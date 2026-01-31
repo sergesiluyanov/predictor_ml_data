@@ -4,14 +4,15 @@
 
 ## Требования
 
-- Python 3.10+
+- **Python 3.10–3.12** (TensorFlow пока не поддерживает 3.13+; при 3.14 установите, например: `brew install python@3.12`)
 - Доступ в интернет (MOEX ISS API)
 
 ## Установка
 
 ```bash
-python -m venv venv
-source venv/bin/activate   # Windows: venv\Scripts\activate
+# Используйте python3.12, если у вас по умолчанию 3.14+
+python3.12 -m venv .venv
+source .venv/bin/activate   # Windows: .venv\Scripts\activate
 pip install -r requirements.txt
 ```
 
@@ -38,15 +39,19 @@ rows = fetch_last_n_days("SBER", days=365)
 
 ## Обучение и экспорт TFLite
 
+Из **того же терминала**, где делали `source .venv/bin/activate`, либо явно через интерпретатор venv:
+
 ```bash
 # По умолчанию: тикер SBER, последние 730 дней, модель → stock_model.tflite
+.venv/bin/python train_stock_model.py
+# или после: source .venv/bin/activate
 python train_stock_model.py
 
 # Свои параметры
-python train_stock_model.py --ticker GAZP --days 500 --epochs 30 --out models/stock_model.tflite
+.venv/bin/python train_stock_model.py --ticker GAZP --days 500 --epochs 30 --out models/stock_model.tflite
 
 # Явный период
-python train_stock_model.py --ticker SBER --from 2023-01-01 --till 2024-12-31 --out stock_model.tflite
+.venv/bin/python train_stock_model.py --ticker SBER --from 2023-01-01 --till 2024-12-31 --out stock_model.tflite
 ```
 
 Модель: окно последних **30 дней** (close, return, volume_norm, weekday) → предсказание **дневной доходности** на следующий день. После обучения сохраняется файл `.tflite`.

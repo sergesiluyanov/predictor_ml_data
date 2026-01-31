@@ -5,8 +5,18 @@
 
 import argparse
 import os
+import sys
 from datetime import datetime
-import numpy as np
+
+try:
+    import numpy as np
+except ImportError:
+    sys.exit(
+        "Не найден numpy. Запускайте скрипт из активированного venv:\n"
+        "  source .venv/bin/activate\n"
+        "  python train_stock_model.py ...\n"
+        "или явно: .venv/bin/python train_stock_model.py ..."
+    )
 
 try:
     import tensorflow as tf
@@ -93,9 +103,14 @@ def main():
     model = create_model(SEQ_LEN, FEATURES)
     model.fit(X, y, epochs=args.epochs, validation_split=0.2, verbose=1)
 
-    # Экспорт в TFLite
+    # Экспорт в TFLite (LSTM требует Select TF ops для TensorList)
     converter = tf.lite.TFLiteConverter.from_keras_model(model)
     converter.optimizations = [tf.lite.Optimize.DEFAULT]
+    converter.target_spec.supported_ops = [
+        tf.lite.OpsSet.TFLITE_BUILTINS,
+        tf.lite.OpsSet.SELECT_TF_OPS,
+    ]
+    converter._experimental_lower_tensor_list_ops = False
     tflite_model = converter.convert()
     out_path = os.path.abspath(args.out)
     os.makedirs(os.path.dirname(out_path) or ".", exist_ok=True)
