@@ -146,18 +146,31 @@ def fetch_all_tickers(start: int = 0) -> list[str]:
 
 
 def fetch_all_tickers_full() -> list[str]:
-    """Загружает полный список тикеров с MOEX (все страницы)."""
+    """Загружает полный список тикеров с MOEX (все страницы). При ошибке сети — пустой список."""
     all_tickers = []
     start = 0
-    while True:
-        batch = fetch_all_tickers(start)
-        if not batch:
-            break
-        all_tickers.extend(batch)
-        if len(batch) < LIST_PAGE_SIZE:
-            break
-        start += LIST_PAGE_SIZE
+    try:
+        while True:
+            batch = fetch_all_tickers(start)
+            if not batch:
+                break
+            all_tickers.extend(batch)
+            if len(batch) < LIST_PAGE_SIZE:
+                break
+            start += LIST_PAGE_SIZE
+    except Exception:
+        pass
     return all_tickers
+
+
+# Запасной список ликвидных тикеров MOEX, если API списка недоступен
+DEFAULT_LIQUID_TICKERS = [
+    "SBER", "GAZP", "LKOH", "GMKN", "NVTK", "YNDX", "ROSN", "TATN", "PLZL",
+    "MAGN", "ALRS", "NLMK", "MTSS", "MOEX", "SNGS", "VTBR", "TCSG", "POLY",
+    "AFKS", "AFLT", "CBOM", "CHMF", "IRAO", "MGNT", "MTLR", "RUAL", "SBERP",
+    "SIBN", "TATNP", "TRNFP", "DSKY", "FIVE", "OZON", "PIKK", "POSI",
+    "RENI", "SMLT", "UPRO", "FIXP", "LSRG", "PHOR", "RTKM", "SGZH", "ENRU",
+]
 
 
 def fetch_last_n_days(ticker: str, days: int = 365) -> list[dict]:
