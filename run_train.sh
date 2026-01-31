@@ -35,9 +35,15 @@ fi
 VENV_PYTHON=".venv/bin/python"
 "$VENV_PYTHON" -m pip install -q -r requirements.txt
 
-echo "Загрузка данных с MOEX и обучение (тикер: ${TICKER:-SBER}, дни: ${DAYS:-730})..."
+# TICKERS=all — обучить на всех тикерах MOEX; иначе один тикер (TICKER) или список через запятую
+if [ -n "$TICKERS" ]; then
+  TICKER_ARGS="--tickers $TICKERS"
+else
+  TICKER_ARGS="--ticker ${TICKER:-SBER}"
+fi
+echo "Загрузка данных с MOEX и обучение ($TICKER_ARGS, дни: ${DAYS:-730})..."
 "$VENV_PYTHON" train_stock_model.py \
-  --ticker "${TICKER:-SBER}" \
+  $TICKER_ARGS \
   --days "${DAYS:-730}" \
   --epochs "${EPOCHS:-20}" \
   --out "${OUT:-stock_model.tflite}" \

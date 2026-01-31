@@ -23,7 +23,11 @@ try:
 except ImportError:
     raise SystemExit("Установите TensorFlow: pip install tensorflow")
 
-from moex_client import fetch_stock_history, fetch_last_n_days
+from moex_client import (
+    fetch_stock_history,
+    fetch_last_n_days,
+    fetch_all_tickers_full,
+)
 
 
 # Параметры модели (должны совпадать с приложением при использовании)
@@ -78,7 +82,18 @@ def create_model(seq_len: int = SEQ_LEN, features: int = FEATURES):
 
 def main():
     parser = argparse.ArgumentParser(description="Train stock prediction model and export TFLite")
-    parser.add_argument("--ticker", default="SBER", help="Тикер MOEX (например SBER, GAZP)")
+    parser.add_argument("--ticker", default=None, help="Один тикер MOEX (если не задан --tickers)")
+    parser.add_argument(
+        "--tickers",
+        default=None,
+        help="Тикеры: 'all' (все с MOEX) или через запятую: SBER,GAZP,LKOH",
+    )
+    parser.add_argument(
+        "--max-tickers",
+        type=int,
+        default=500,
+        help="Макс. число тикеров при --tickers all (по умолчанию 500)",
+    )
     parser.add_argument("--days", type=int, default=730, help="Сколько дней истории загружать")
     parser.add_argument("--epochs", type=int, default=20, help="Эпохи обучения")
     parser.add_argument("--out", default="stock_model.tflite", help="Путь к выходному .tflite")
@@ -86,19 +101,60 @@ def main():
     parser.add_argument("--till", dest="till_date", default=None, help="Конец периода YYYY-MM-DD")
     args = parser.parse_args()
 
-    if args.from_date and args.till_date:
-        rows = fetch_stock_history(args.ticker, args.from_date, args.till_date)
+    # Список тикеров для обучения
+    if args.tickers is not None:
+        if args.tickers.strip().lower() == "all":
+            print("Загрузка списка тикеров с MOEX...")
+            tickers = fetch_all_tickers_full()
+            tickers = tickers[: args.max_tickers]
+            print(f"Тикеров для загрузки: {len(tickers)}")
+        else:
+            tickers = [t.strip() for t in args.tickers.split(",") if t.strip()]
     else:
-        rows = fetch_last_n_days(args.ticker, args.days)
+        tickers = [args.ticker or "SBER"]
 
-    if len(rows) < SEQ_LEN + 10:
-        raise SystemExit(f"Мало данных: {len(rows)} записей. Нужно минимум {SEQ_LEN + 10}.")
+    min_rows = SEQ_LEN + 10
+    X_parts, y_parts = [], []
+    failed, skipped = [], []
 
-    X, y = build_dataset_fixed(rows, SEQ_LEN)
-    if X is None:
-        raise SystemExit("Не удалось построить датасет.")
+    for i, ticker in enumerate(tickers):
+        if (i + 1) % 50 == 0 or i == 0:
+            print(f"Загрузка данных: {i + 1}/{len(tickers)} — {ticker}...")
+        try:
+            if args.from_date and args.till_date:
+                rows = fetch_stock_history(ticker, args.from_date, args.till_date)
+            else:
+                rows = fetch_last_n_days(ticker, args.days)
+        except Exception as e:
+            failed.append((ticker, str(e)))
+            continue
+        if len(rows) < min_rows:
+            skipped.append((ticker, len(rows)))
+            continue
+        X_t, y_t = build_dataset_fixed(rows, SEQ_LEN)
+        if X_t is not None and y_t is not None:
+            X_parts.append(X_t)
+            y_parts.append(y_t)
 
-    print(f"Dataset: X {X.shape}, y {y.shape}")
+    if not X_parts:
+        raise SystemExit(
+            "Нет данных ни по одному тикеру. "
+            f"Пропущено (мало данных): {len(skipped)}, ошибки: {len(failed)}. "
+            "Проверьте --days или --tickers."
+        )
+
+    X = np.concatenate(X_parts, axis=0)
+    y = np.concatenate(y_parts, axis=0)
+    # Перемешиваем для обучения (по срезам от разных тикеров)
+    rng = np.random.default_rng(42)
+    idx = rng.permutation(len(y))
+    X, y = X[idx], y[idx]
+
+    if failed:
+        print(f"Ошибки загрузки ({len(failed)}): {failed[:5]}{'...' if len(failed) > 5 else ''}")
+    if skipped:
+        print(f"Пропущено из-за малого числа записей: {len(skipped)} тикеров")
+    print(f"Dataset: X {X.shape}, y {y.shape} (тикеров использовано: {len(X_parts)})")
 
     model = create_model(SEQ_LEN, FEATURES)
     model.fit(X, y, epochs=args.epochs, validation_split=0.2, verbose=1)

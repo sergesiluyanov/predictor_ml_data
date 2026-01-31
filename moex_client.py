@@ -3,13 +3,20 @@ MOEX ISS API client — получение исторических данных
 Соответствует логике Flutter-приложения (stock_service.dart).
 """
 
+import time
 import requests
 from datetime import datetime, timedelta
 from typing import Optional
 
+# Повторы при сбоях сети (Connection reset, timeout)
+REQUEST_RETRIES = 3
+REQUEST_RETRY_DELAY = 2
+
 
 BASE_URL = "https://iss.moex.com/iss/history/engines/stock/markets/shares/securities"
+SECURITIES_LIST_URL = "https://iss.moex.com/iss/engines/stock/markets/shares/securities.json"
 PAGE_SIZE = 100
+LIST_PAGE_SIZE = 100
 
 
 def parse_date(date_str: str) -> datetime:
@@ -98,6 +105,59 @@ def fetch_stock_history(
 
     result = [by_date[d] for d in sorted(by_date)]
     return result
+
+
+def _get_with_retries(url: str, timeout: int = 30) -> requests.Response | None:
+    """GET с повторами при ConnectionError / timeout."""
+    for attempt in range(REQUEST_RETRIES):
+        try:
+            resp = requests.get(url, timeout=timeout)
+            return resp
+        except (requests.ConnectionError, requests.exceptions.ConnectTimeout, OSError) as e:
+            if attempt < REQUEST_RETRIES - 1:
+                time.sleep(REQUEST_RETRY_DELAY * (attempt + 1))
+            else:
+                raise e
+    return None
+
+
+def fetch_all_tickers(start: int = 0) -> list[str]:
+    """
+    Загружает список тикеров (SECID) с рынка акций MOEX.
+    Пагинация: start=0, 100, 200, ...
+    """
+    url = f"{SECURITIES_LIST_URL}?start={start}"
+    resp = _get_with_retries(url)
+    if resp is None or resp.status_code != 200:
+        return []
+    data = resp.json()
+    if not isinstance(data, dict) or "securities" not in data:
+        return []
+    block = data["securities"]
+    if not isinstance(block, dict) or "columns" not in block or "data" not in block:
+        return []
+    columns = block["columns"]
+    rows = block["data"]
+    try:
+        idx = columns.index("SECID")
+    except ValueError:
+        return []
+    return [str(row[idx]) for row in rows if len(row) > idx and row[idx]]
+
+
+def fetch_all_tickers_full() -> list[str]:
+    """Загружает полный список тикеров с MOEX (все страницы)."""
+    all_tickers = []
+    start = 0
+    while True:
+        batch = fetch_all_tickers(start)
+        if not batch:
+            break
+        all_tickers.extend(batch)
+        if len(batch) < LIST_PAGE_SIZE:
+            break
+        start += LIST_PAGE_SIZE
+    return all_tickers
 
 
 def fetch_last_n_days(ticker: str, days: int = 365) -> list[dict]:

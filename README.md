@@ -47,8 +47,17 @@ rows = fetch_last_n_days("SBER", days=365)
 # или после: source .venv/bin/activate
 python train_stock_model.py
 
-# Свои параметры
+# Один тикер, свои параметры
 .venv/bin/python train_stock_model.py --ticker GAZP --days 500 --epochs 30 --out models/stock_model.tflite
+
+# Все известные тикеры MOEX (модель учится на всех бумагах)
+.venv/bin/python train_stock_model.py --tickers all --days 730 --epochs 20
+
+# Несколько тикеров через запятую
+.venv/bin/python train_stock_model.py --tickers SBER,GAZP,LKOH,YNDX --days 730
+
+# Ограничить число тикеров при --tickers all (по умолчанию 500)
+.venv/bin/python train_stock_model.py --tickers all --max-tickers 200 --days 365
 
 # Явный период
 .venv/bin/python train_stock_model.py --ticker SBER --from 2023-01-01 --till 2024-12-31 --out stock_model.tflite
