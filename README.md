@@ -50,7 +50,7 @@ python train_stock_model.py
 # Один тикер, свои параметры
 .venv/bin/python train_stock_model.py --ticker GAZP --days 500 --epochs 30 --out models/stock_model.tflite
 
-# Все известные тикеры MOEX (модель учится на всех бумагах)
+# Все ликвидные тикеры MOEX (площадка TQBR — основные торги; при недоступности API — встроенный список)
 .venv/bin/python train_stock_model.py --tickers all --days 730 --epochs 20
 
 # Несколько тикеров через запятую

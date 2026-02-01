@@ -26,7 +26,7 @@ except ImportError:
 from moex_client import (
     fetch_stock_history,
     fetch_last_n_days,
-    fetch_all_tickers_full,
+    fetch_liquid_tickers_full,
     DEFAULT_LIQUID_TICKERS,
 )
 
@@ -105,9 +105,9 @@ def main():
     # Список тикеров для обучения
     if args.tickers is not None:
         if args.tickers.strip().lower() == "all":
-            print("Загрузка списка тикеров с MOEX...")
+            print("Загрузка списка ликвидных тикеров (площадка TQBR) с MOEX...")
             try:
-                tickers = fetch_all_tickers_full()
+                tickers = fetch_liquid_tickers_full()
             except Exception as e:
                 print(f"API списка тикеров недоступен ({e}), используем встроенный список.")
                 tickers = []
@@ -116,7 +116,7 @@ def main():
                 print(f"Используем встроенный список ликвидных тикеров: {len(tickers)} шт.")
             else:
                 tickers = tickers[: args.max_tickers]
-                print(f"Тикеров для загрузки: {len(tickers)}")
+                print(f"Ликвидных тикеров (TQBR) для загрузки: {len(tickers)}")
         else:
             tickers = [t.strip() for t in args.tickers.split(",") if t.strip()]
     else:

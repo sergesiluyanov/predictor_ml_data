@@ -15,6 +15,8 @@ REQUEST_RETRY_DELAY = 2
 
 BASE_URL = "https://iss.moex.com/iss/history/engines/stock/markets/shares/securities"
 SECURITIES_LIST_URL = "https://iss.moex.com/iss/engines/stock/markets/shares/securities.json"
+# Основная площадка TQBR — самые ликвидные акции (режим основных торгов)
+LIQUID_BOARD_URL = "https://iss.moex.com/iss/engines/stock/markets/shares/boards/TQBR/securities.json"
 PAGE_SIZE = 100
 LIST_PAGE_SIZE = 100
 
@@ -121,19 +123,8 @@ def _get_with_retries(url: str, timeout: int = 30) -> requests.Response | None:
     return None
 
 
-def fetch_all_tickers(start: int = 0) -> list[str]:
-    """
-    Загружает список тикеров (SECID) с рынка акций MOEX.
-    Пагинация: start=0, 100, 200, ...
-    """
-    url = f"{SECURITIES_LIST_URL}?start={start}"
-    resp = _get_with_retries(url)
-    if resp is None or resp.status_code != 200:
-        return []
-    data = resp.json()
-    if not isinstance(data, dict) or "securities" not in data:
-        return []
-    block = data["securities"]
+def _parse_tickers_from_block(block: dict) -> list[str]:
+    """Из блока securities извлекает список SECID."""
     if not isinstance(block, dict) or "columns" not in block or "data" not in block:
         return []
     columns = block["columns"]
@@ -145,6 +136,21 @@ def fetch_all_tickers(start: int = 0) -> list[str]:
     return [str(row[idx]) for row in rows if len(row) > idx and row[idx]]
 
 
+def fetch_all_tickers(start: int = 0) -> list[str]:
+    """
+    Загружает список тикеров (SECID) с рынка акций MOEX (все площадки).
+    Пагинация: start=0, 100, 200, ...
+    """
+    url = f"{SECURITIES_LIST_URL}?start={start}"
+    resp = _get_with_retries(url)
+    if resp is None or resp.status_code != 200:
+        return []
+    data = resp.json()
+    if not isinstance(data, dict) or "securities" not in data:
+        return []
+    return _parse_tickers_from_block(data["securities"])
+
+
 def fetch_all_tickers_full() -> list[str]:
     """Загружает полный список тикеров с MOEX (все страницы). При ошибке сети — пустой список."""
     all_tickers = []
@@ -152,6 +158,48 @@ def fetch_all_tickers_full() -> list[str]:
     try:
         while True:
             batch = fetch_all_tickers(start)
+            if not batch:
+                break
+            all_tickers.extend(batch)
+            if len(batch) < LIST_PAGE_SIZE:
+                break
+            start += LIST_PAGE_SIZE
+    except Exception:
+        pass
+    return all_tickers
+
+
+def fetch_liquid_tickers(start: int = 0) -> list[str]:
+    """
+    Загружает тикеры только с основной площадки TQBR (самые ликвидные акции).
+    Пагинация: start=0, 100, 200, ...
+    """
+    url = f"{LIQUID_BOARD_URL}?start={start}"
+    resp = _get_with_retries(url)
+    if resp is None or resp.status_code != 200:
+        return []
+    data = resp.json()
+    # Ответ может быть: securities в корне или в блоке с именем площадки
+    block = None
+    if isinstance(data, dict):
+        block = data.get("securities") or data.get("TQBR")
+        if block is None and len(data) == 1:
+            block = next(iter(data.values()), None)
+    if block is None:
+        return []
+    return _parse_tickers_from_block(block)
+
+
+def fetch_liquid_tickers_full() -> list[str]:
+    """
+    Загружает полный список тикеров с площадки TQBR (ликвидные акции).
+    При ошибке сети — пустой список.
+    """
+    all_tickers = []
+    start = 0
+    try:
+        while True:
+            batch = fetch_liquid_tickers(start)
             if not batch:
                 break
             all_tickers.extend(batch)

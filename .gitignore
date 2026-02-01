@@ -1,0 +1,26 @@
+# Виртуальное окружение (не коммитить — большие файлы TensorFlow и др.)
+.venv/
+venv/
+env/
+
+# Python
+__pycache__/
+*.py[cod]
+*.pyo
+*.egg-info/
+.eggs/
+dist/
+build/
+
+# Модели и артефакты (опционально — раскомментируйте, если не хранить в репо)
+# *.tflite
+# *.pkl
+# model_config.json
+
+# IDE и ОС
+.idea/
+.vscode/
+.DS_Store
+
+# Jupyter
+.ipynb_checkpoints/
