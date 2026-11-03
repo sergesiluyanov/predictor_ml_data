@@ -113,6 +113,10 @@ python bot.py
 CatBoost-модели нет, используются модели TFLite. Явный путь можно задать
 переменной `MODEL_PATH`.
 
+Если присутствует `models/stock_signal.cbm`, бот дополнительно показывает
+отдельный торговый сигнал следующей сессии. Он прогнозирует движение от
+следующего открытия до закрытия и может вернуть «нет подтверждённого сигнала».
+
 > Прогноз предназначен только для демонстрации и не является инвестиционной
 > рекомендацией. Перед практическим использованием модель необходимо проверить
 > на временном бэктесте.
@@ -164,6 +168,24 @@ Walk-forward-бэктест обучает модель только на про
 Зафиксированные результаты экспериментов приведены в
 [`QUALITY_REPORT.md`](QUALITY_REPORT.md).
 
+Бинарная модель торгового сигнала:
+
+```bash
+# Walk-forward-проверка
+.venv/bin/python backtest_binary_signal.py \
+  --tickers all \
+  --max-tickers 0 \
+  --days 1500 \
+  --iterations 500
+
+# Итоговое обучение
+.venv/bin/python train_binary_signal_model.py \
+  --tickers all \
+  --max-tickers 0 \
+  --days 1500 \
+  --out models/stock_signal.cbm
+```
+
 ## Перенос модели в Flutter-приложение
 
 1. Скопируйте `stock_model.tflite` в проект:
@@ -188,7 +210,9 @@ predictor_ml_data/
   predictor.py         # Инференс CatBoost/TFLite
   tabular_features.py  # Признаки CatBoost
   train_direction_model.py
+  train_binary_signal_model.py
   backtest_direction.py
+  backtest_binary_signal.py
   backtest.py
   moex_client.py       # Клиент MOEX ISS API
   train_stock_model.py  # Обучение + экспорт .tflite

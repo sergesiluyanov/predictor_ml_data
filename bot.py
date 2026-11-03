@@ -65,6 +65,24 @@ def _forecast_text(prediction: StockPrediction) -> str:
             f"падение {prediction.probabilities['down']:.1%}\n"
             f"{signal_text}\n"
         )
+    trading_text = ""
+    if prediction.trading_signal:
+        trading_names = {
+            "up": "рост",
+            "down": "падение",
+            "none": "нет подтверждённого сигнала",
+        }
+        confidence_text = (
+            f" ({prediction.trading_confidence:.1%})"
+            if prediction.trading_signal != "none"
+            and prediction.trading_confidence is not None
+            else ""
+        )
+        trading_text = (
+            "\nСигнал на следующую сессию: "
+            f"<b>{trading_names[prediction.trading_signal]}</b>"
+            f"{confidence_text}\n"
+        )
     return (
         f"<b>{prediction.ticker}</b>\n"
         f"Цена на {prediction.last_date}: "
@@ -72,7 +90,7 @@ def _forecast_text(prediction: StockPrediction) -> str:
         f"Прогноз на {prediction.forecast_date}: "
         f"<b>{_format_price(prediction.predicted_price)} ₽</b>\n"
         f"{arrow} Ожидаемое изменение: <b>{change:+.2f}%</b>"
-        f"{probability_text}\n"
+        f"{probability_text}{trading_text}\n"
         "⚠️ Прогноз модели не является инвестиционной рекомендацией."
     )
 

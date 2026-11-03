@@ -14,6 +14,7 @@ import tensorflow as tf
 
 from feature_pipeline import build_latest_input
 from moex_client import fetch_index_last_n_days, fetch_last_n_days
+from signal_model import calibrate_probabilities
 from tabular_features import CLASS_NAMES, latest_feature_row
 
 
@@ -37,6 +38,9 @@ class StockPrediction:
     probabilities: dict[str, float] | None = None
     signal: str | None = None
     signal_threshold: float | None = None
+    trading_signal: str | None = None
+    trading_up_probability: float | None = None
+    trading_confidence: float | None = None
 
 
 def normalize_ticker(value: str) -> str:
@@ -175,6 +179,57 @@ def _get_direction_runner(model_path: Path) -> _DirectionModelRunner:
         return _DIRECTION_RUNNERS[resolved_path]
 
 
+class _BinarySignalRunner:
+    def __init__(self, model_path: Path):
+        self.model = CatBoostClassifier()
+        self.model.load_model(model_path)
+        metadata_path = model_path.with_suffix(".json")
+        self.metadata = json.loads(
+            metadata_path.read_text(encoding="utf-8")
+        )
+        self.lock = threading.Lock()
+
+    def predict(
+        self, ticker: str, rows: list[dict], market_rows: list[dict]
+    ) -> tuple[str, float, float]:
+        features = latest_feature_row(rows, ticker, market_rows)
+        with self.lock:
+            raw_probability = float(
+                self.model.predict_proba(features)[0, 1]
+            )
+        up_probability = float(
+            calibrate_probabilities(
+                np.asarray([raw_probability]),
+                float(self.metadata["calibration_coefficient"]),
+                float(self.metadata["calibration_intercept"]),
+            )[0]
+        )
+        up_threshold = self.metadata.get("up_confidence_threshold")
+        down_threshold = self.metadata.get("down_confidence_threshold")
+        if up_threshold is not None and up_probability >= float(up_threshold):
+            return "up", up_probability, up_probability
+        down_probability = 1.0 - up_probability
+        if (
+            down_threshold is not None
+            and down_probability >= float(down_threshold)
+        ):
+            return "down", up_probability, down_probability
+        return "none", up_probability, max(up_probability, down_probability)
+
+
+_BINARY_RUNNERS: dict[Path, _BinarySignalRunner] = {}
+
+
+def _get_binary_runner(model_path: Path) -> _BinarySignalRunner:
+    resolved_path = model_path.resolve()
+    with _RUNNERS_LOCK:
+        if resolved_path not in _BINARY_RUNNERS:
+            _BINARY_RUNNERS[resolved_path] = _BinarySignalRunner(
+                resolved_path
+            )
+        return _BINARY_RUNNERS[resolved_path]
+
+
 def predict_stock(ticker_value: str, history_days: int = 730) -> StockPrediction:
     ticker = normalize_ticker(ticker_value)
     model_path = find_model(ticker)
@@ -187,6 +242,7 @@ def predict_stock(ticker_value: str, history_days: int = 730) -> StockPrediction
     if not rows:
         raise PredictionError(f"MOEX не вернула данные для тикера {ticker}.")
 
+    market_rows = None
     try:
         if model_path.suffix.lower() == ".cbm":
             market_rows = fetch_index_last_n_days("IMOEX", history_days)
@@ -207,6 +263,24 @@ def predict_stock(ticker_value: str, history_days: int = 730) -> StockPrediction
             probabilities = None
             signal = None
             signal_threshold = None
+
+        signal_model_path = Path("models/stock_signal.cbm")
+        if signal_model_path.is_file():
+            if market_rows is None:
+                market_rows = fetch_index_last_n_days(
+                    "IMOEX", history_days
+                )
+            (
+                trading_signal,
+                trading_up_probability,
+                trading_confidence,
+            ) = _get_binary_runner(signal_model_path).predict(
+                ticker, rows, market_rows
+            )
+        else:
+            trading_signal = None
+            trading_up_probability = None
+            trading_confidence = None
     except PredictionError:
         raise
     except Exception as exc:
@@ -227,4 +301,7 @@ def predict_stock(ticker_value: str, history_days: int = 730) -> StockPrediction
         probabilities=probabilities,
         signal=signal,
         signal_threshold=signal_threshold,
+        trading_signal=trading_signal,
+        trading_up_probability=trading_up_probability,
+        trading_confidence=trading_confidence,
     )
