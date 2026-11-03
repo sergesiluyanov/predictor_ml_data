@@ -2,6 +2,7 @@
 .venv/
 venv/
 env/
+.env
 
 # Python
 __pycache__/
@@ -11,6 +12,7 @@ __pycache__/
 .eggs/
 dist/
 build/
+reports/
 
 # Модели и артефакты (опционально — раскомментируйте, если не хранить в репо)
 # *.tflite

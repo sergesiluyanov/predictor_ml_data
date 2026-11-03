@@ -14,6 +14,7 @@ REQUEST_RETRY_DELAY = 2
 
 
 BASE_URL = "https://iss.moex.com/iss/history/engines/stock/markets/shares/securities"
+INDEX_BASE_URL = "https://iss.moex.com/iss/history/engines/stock/markets/index/securities"
 SECURITIES_LIST_URL = "https://iss.moex.com/iss/engines/stock/markets/shares/securities.json"
 # Основная площадка TQBR — самые ликвидные акции (режим основных торгов)
 LIQUID_BOARD_URL = "https://iss.moex.com/iss/engines/stock/markets/shares/boards/TQBR/securities.json"
@@ -47,6 +48,24 @@ def fetch_stock_history(
     Загружает историю торгов по тикеру с MOEX.
     Возвращает список записей с полями: tradedate, close, volume, high, low.
     """
+    return _fetch_history(BASE_URL, ticker, from_date, till_date)
+
+
+def fetch_index_history(
+    ticker: str,
+    from_date: str,
+    till_date: str,
+) -> list[dict]:
+    """Загружает историю индекса MOEX, например IMOEX."""
+    return _fetch_history(INDEX_BASE_URL, ticker, from_date, till_date)
+
+
+def _fetch_history(
+    base_url: str,
+    ticker: str,
+    from_date: str,
+    till_date: str,
+) -> list[dict]:
     start = parse_date(from_date)
     end = parse_date(till_date)
     yesterday = datetime.now() - timedelta(days=1)
@@ -58,12 +77,12 @@ def fetch_stock_history(
 
     while True:
         url = (
-            f"{BASE_URL}/{ticker}.json"
+            f"{base_url}/{ticker}.json"
             f"?from={from_date}&till={till_date}&start={page_start}"
             f"&iss.meta=off&iss.json=extended"
         )
-        resp = requests.get(url, timeout=30)
-        if resp.status_code != 200:
+        resp = _get_with_retries(url)
+        if resp is None or resp.status_code != 200:
             break
 
         data = resp.json()
@@ -154,13 +173,18 @@ def fetch_all_tickers(start: int = 0) -> list[str]:
 def fetch_all_tickers_full() -> list[str]:
     """Загружает полный список тикеров с MOEX (все страницы). При ошибке сети — пустой список."""
     all_tickers = []
+    seen = set()
     start = 0
     try:
         while True:
             batch = fetch_all_tickers(start)
             if not batch:
                 break
-            all_tickers.extend(batch)
+            new_tickers = [ticker for ticker in batch if ticker not in seen]
+            if not new_tickers:
+                break
+            all_tickers.extend(new_tickers)
+            seen.update(new_tickers)
             if len(batch) < LIST_PAGE_SIZE:
                 break
             start += LIST_PAGE_SIZE
@@ -196,14 +220,22 @@ def fetch_liquid_tickers_full() -> list[str]:
     При ошибке сети — пустой список.
     """
     all_tickers = []
+    seen = set()
     start = 0
     try:
         while True:
             batch = fetch_liquid_tickers(start)
             if not batch:
                 break
-            all_tickers.extend(batch)
-            if len(batch) < LIST_PAGE_SIZE:
+            new_tickers = [ticker for ticker in batch if ticker not in seen]
+            if not new_tickers:
+                break
+            all_tickers.extend(new_tickers)
+            seen.update(new_tickers)
+            # Этот endpoint сейчас возвращает весь TQBR одним блоком (>100)
+            # и игнорирует start. Защита выше также предотвращает цикл, если
+            # поведение API снова изменится.
+            if len(batch) != LIST_PAGE_SIZE:
                 break
             start += LIST_PAGE_SIZE
     except Exception:
@@ -226,6 +258,19 @@ def fetch_last_n_days(ticker: str, days: int = 365) -> list[dict]:
     end = datetime.now() - timedelta(days=1)
     start = end - timedelta(days=days)
     return fetch_stock_history(
+        ticker,
+        start.strftime("%Y-%m-%d"),
+        end.strftime("%Y-%m-%d"),
+    )
+
+
+def fetch_index_last_n_days(
+    ticker: str = "IMOEX", days: int = 365
+) -> list[dict]:
+    """Загружает последние N календарных дней истории индекса."""
+    end = datetime.now() - timedelta(days=1)
+    start = end - timedelta(days=days)
+    return fetch_index_history(
         ticker,
         start.strftime("%Y-%m-%d"),
         end.strftime("%Y-%m-%d"),

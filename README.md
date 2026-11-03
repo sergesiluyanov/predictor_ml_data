@@ -56,6 +56,10 @@ python train_stock_model.py
 # Несколько тикеров через запятую
 .venv/bin/python train_stock_model.py --tickers SBER,GAZP,LKOH,YNDX --days 730
 
+# Отдельная модель на каждый тикер (меньше нагрузка: обучается по одному тикеру за раз)
+.venv/bin/python train_stock_model.py --tickers SBER,GAZP,LKOH --per-ticker --out models/
+# → models/stock_model_SBER.tflite, models/stock_model_GAZP.tflite, ...
+
 # Ограничить число тикеров при --tickers all (по умолчанию 500)
 .venv/bin/python train_stock_model.py --tickers all --max-tickers 200 --days 365
 
@@ -64,6 +68,95 @@ python train_stock_model.py
 ```
 
 Модель: окно последних **30 дней** (close, return, volume_norm, weekday) → предсказание **дневной доходности** на следующий день. После обучения сохраняется файл `.tflite`.
+
+## Telegram-бот (MVP)
+
+Бот принимает тикер MOEX, показывает прогноз на следующий торговый день и
+отправляет график истории с прогнозной точкой.
+
+1. Создайте бота через `@BotFather` и получите токен.
+2. Установите зависимости и создайте конфигурацию:
+
+```bash
+source .venv/bin/activate
+pip install -r requirements.txt
+cp .env.example .env
+```
+
+3. Запишите токен в `.env`:
+
+```dotenv
+TELEGRAM_BOT_TOKEN=ваш_токен
+```
+
+4. Обучите общую CatBoost-модель, если её ещё нет, и запустите бота:
+
+```bash
+python train_direction_model.py \
+  --tickers SBER,GAZP,LKOH,GMKN,NVTK,ROSN,TATN,MOEX,CHMF,IRAO \
+  --days 1500 \
+  --out models/stock_direction.cbm
+python bot.py
+```
+
+Команды:
+
+- `/predict SBER` — текстовый прогноз;
+- `/chart SBER` — прогноз и PNG-график;
+- сообщение `SBER` — текстовый прогноз.
+
+Бот сначала ищет общую `models/stock_direction.cbm`, показывает вероятности
+роста, боковика и падения и отсекает сигналы с уверенностью ниже 55%. Если
+CatBoost-модели нет, используются модели TFLite. Явный путь можно задать
+переменной `MODEL_PATH`.
+
+> Прогноз предназначен только для демонстрации и не является инвестиционной
+> рекомендацией. Перед практическим использованием модель необходимо проверить
+> на временном бэктесте.
+
+## Проверка качества прогнозов
+
+Walk-forward-бэктест обучает модель только на прошлом и проверяет на следующем
+временном отрезке. Он сравнивает модель с нулевым прогнозом, последней дневной
+доходностью и средней доходностью за 5 дней.
+
+```bash
+# Быстрая проверка одного тикера
+.venv/bin/python backtest.py --tickers SBER --days 1500 --epochs 10
+
+# Проверка 20 ликвидных тикеров
+.venv/bin/python backtest.py \
+  --tickers all \
+  --max-tickers 20 \
+  --days 1500 \
+  --epochs 10 \
+  --folds 3
+```
+
+В `reports/` сохраняются:
+
+- JSON с итоговыми метриками по модели, baseline и каждому тикеру;
+- CSV со всеми прогнозами и фактическими результатами;
+- PNG с накопленной доходностью long/cash-стратегий.
+
+Основные метрики: MAE, RMSE, точность направления, корреляция и доходность
+после заданной комиссии (`--commission-bps`, по умолчанию 10 базисных пунктов).
+
+Трёхклассовая CatBoost-модель проверяется отдельно:
+
+```bash
+.venv/bin/python backtest_direction.py \
+  --tickers SBER,GAZP,LKOH,GMKN,NVTK,ROSN,TATN,MOEX,CHMF,IRAO \
+  --days 1500 \
+  --iterations 300 \
+  --folds 3
+```
+
+Цель модели: `down`, `flat` или `up` с порогом дневного изменения 0,3%.
+Признаки включают доходности разных горизонтов, волатильность, SMA, RSI, ATR,
+объём, диапазон дня, календарные признаки и динамику индекса IMOEX.
+Зафиксированные результаты экспериментов приведены в
+[`QUALITY_REPORT.md`](QUALITY_REPORT.md).
 
 ## Перенос модели в Flutter-приложение
 
@@ -85,6 +178,12 @@ python train_stock_model.py
 
 ```text
 predictor_ml_data/
+  bot.py               # Telegram-бот
+  predictor.py         # Инференс CatBoost/TFLite
+  tabular_features.py  # Признаки CatBoost
+  train_direction_model.py
+  backtest_direction.py
+  backtest.py
   moex_client.py       # Клиент MOEX ISS API
   train_stock_model.py  # Обучение + экспорт .tflite
   requirements.txt

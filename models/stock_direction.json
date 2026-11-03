@@ -1,0 +1,72 @@
+{
+  "created_at": "2026-11-03T15:49:28",
+  "model_type": "catboost_direction_3class",
+  "model_path": "models/stock_direction.cbm",
+  "threshold": 0.003,
+  "feature_columns": [
+    "ticker",
+    "return_1",
+    "return_3",
+    "return_5",
+    "return_10",
+    "return_20",
+    "mean_return_5",
+    "mean_return_10",
+    "volatility_5",
+    "volatility_10",
+    "volatility_20",
+    "sma_gap_5",
+    "sma_gap_10",
+    "sma_gap_20",
+    "rsi_14",
+    "atr_14",
+    "range_pct",
+    "volume_change",
+    "volume_z_20",
+    "market_return_1",
+    "market_return_5",
+    "market_return_20",
+    "market_volatility_20",
+    "relative_return_5",
+    "weekday_sin",
+    "weekday_cos"
+  ],
+  "categorical_features": [
+    "ticker"
+  ],
+  "class_names": {
+    "0": "down",
+    "1": "flat",
+    "2": "up"
+  },
+  "tickers": [
+    "CHMF",
+    "GAZP",
+    "GMKN",
+    "IRAO",
+    "LKOH",
+    "MOEX",
+    "NVTK",
+    "ROSN",
+    "SBER",
+    "TATN"
+  ],
+  "first_target_date": "2022-10-25",
+  "last_target_date": "2026-11-02",
+  "skipped": [],
+  "train_rows": 8186,
+  "validation_rows": 2050,
+  "validation_start": "2026-01-15",
+  "validation_accuracy": 0.40829268292682924,
+  "validation_per_class_accuracy": {
+    "down": 0.44652701212789414,
+    "flat": 0.36023054755043227,
+    "up": 0.38567839195979897
+  },
+  "class_mean_returns": {
+    "0": -0.01462970654434562,
+    "1": -8.026267386117553e-05,
+    "2": 0.016078123413824846
+  },
+  "best_iteration": 66
+}
