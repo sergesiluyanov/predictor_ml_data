@@ -2,8 +2,10 @@
 
 import asyncio
 from html import escape
+import json
 import logging
 import os
+from pathlib import Path
 
 from aiogram import Bot, Dispatcher
 from aiogram.client.default import DefaultBotProperties
@@ -126,6 +128,7 @@ async def start_handler(message: Message) -> None:
         "Отправьте тикер акции MOEX или используйте команды:\n"
         "<code>/predict SBER</code> — прогноз цены\n"
         "<code>/chart SBER</code> — прогноз с графиком\n"
+        "<code>/ideas</code> — проверенные long-кандидаты на 5 сессий\n"
         "<code>/help</code> — справка"
     )
 
@@ -133,6 +136,40 @@ async def start_handler(message: Message) -> None:
 @dispatcher.message(Command("help"))
 async def help_handler(message: Message) -> None:
     await start_handler(message)
+
+
+@dispatcher.message(Command("ideas"))
+async def ideas_handler(message: Message) -> None:
+    path = Path("models/latest_long_ideas.json")
+    if not path.is_file():
+        await message.answer(
+            "Список long-кандидатов ещё не сформирован. "
+            "Запустите <code>generate_long_ideas.py</code>."
+        )
+        return
+    try:
+        payload = json.loads(path.read_text(encoding="utf-8"))
+    except (OSError, json.JSONDecodeError):
+        logger.exception("Cannot read long ideas")
+        await message.answer("Не удалось прочитать список long-кандидатов.")
+        return
+    candidates = payload.get("candidates", [])
+    if candidates:
+        lines = [
+            f"{item['rank']}. <b>{escape(item['ticker'])}</b>"
+            for item in candidates[:10]
+        ]
+        candidates_text = "\n".join(lines)
+    else:
+        candidates_text = "Подходящих кандидатов сейчас нет — режим cash."
+    await message.answer(
+        f"<b>Long-кандидаты на 5 сессий</b>\n"
+        f"Данные на {escape(str(payload.get('as_of', '—')))}\n"
+        f"{candidates_text}\n\n"
+        "Сигнал прошёл исторический walk-forward gate, "
+        "но ещё проходит live-проверку.\n"
+        "⚠️ Не является инвестиционной рекомендацией."
+    )
 
 
 @dispatcher.message(Command("predict"))

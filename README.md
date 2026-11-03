@@ -106,6 +106,7 @@ python bot.py
 
 - `/predict SBER` — текстовый прогноз;
 - `/chart SBER` — прогноз и PNG-график;
+- `/ideas` — актуальные long-кандидаты на пять торговых сессий;
 - сообщение `SBER` — текстовый прогноз.
 
 Бот сначала ищет общую `models/stock_direction.cbm`, показывает вероятности
@@ -208,6 +209,36 @@ Walk-forward-бэктест обучает модель только на про
 LightGBM сохраняется в `models/stock_signal_lgbm.txt`. Бот использует
 зафиксированную stable warning-policy; CatBoost остаётся fallback.
 
+Cross-sectional long ranker проверяется и обучается отдельно:
+
+```bash
+# Nested walk-forward для горизонтов 1/3/5 дней
+.venv/bin/python backtest_ranker.py \
+  --tickers all \
+  --max-tickers 0 \
+  --days 1500 \
+  --horizons 1,3,5 \
+  --commission-bps 10 \
+  --slippage-bps 5
+
+# Финальное обучение разрешено только для прошедшей gate H5/top 3% policy
+.venv/bin/python train_ranker_model.py \
+  --tickers all \
+  --max-tickers 0 \
+  --days 1500
+
+# Обновлять после завершения торгов перед запуском/по расписанию
+.venv/bin/python generate_long_ideas.py \
+  --tickers all \
+  --max-tickers 0 \
+  --refresh
+```
+
+Команда бота `/ideas` читает `models/latest_long_ideas.json`. Ranker выбирает
+только ликвидные бумаги, работает при положительном 20-дневном тренде IMOEX и
+волатильности ниже 2%; иначе возвращает режим cash. Исторический H5 gate пройден,
+но сигналы всё ещё требуют неизменяемой live-валидации.
+
 Расширенный отчёт содержит precision/recall/coverage, log loss, Brier score,
 calibration error, bootstrap 95% CI, результаты по fold, годам, режимам рынка
 и ликвидности, а также автоматический quality gate. Модель не должна заменять
@@ -239,9 +270,12 @@ predictor_ml_data/
   train_direction_model.py
   train_binary_signal_model.py
   train_ensemble_signal_model.py
+  train_ranker_model.py
   backtest_direction.py
   backtest_binary_signal.py
   backtest_ensemble_signal.py
+  backtest_ranker.py
+  generate_long_ideas.py
   backtest.py
   moex_client.py       # Клиент MOEX ISS API
   train_stock_model.py  # Обучение + экспорт .tflite

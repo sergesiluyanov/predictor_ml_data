@@ -14,6 +14,7 @@ dist/
 build/
 reports/
 data/cache/
+models/latest_long_ideas.json
 
 # Модели и артефакты (опционально — раскомментируйте, если не хранить в репо)
 # *.tflite
