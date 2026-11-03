@@ -12,6 +12,12 @@ import matplotlib.pyplot as plt
 import numpy as np
 import pandas as pd
 
+from evaluation_metrics import (
+    grouped_signal_metrics,
+    quality_gate,
+    signal_quality_metrics,
+    trading_quality_metrics,
+)
 from signal_model import (
     calibrate_probabilities,
     prepare_binary_dataset,
@@ -133,6 +139,9 @@ def run_walk_forward(
                 "target_return",
                 "strategy_return",
                 "return_1",
+                "market_return_20",
+                "market_volatility_20",
+                "log_turnover",
             ]
         ].copy()
         result["fold"] = fold
@@ -203,6 +212,7 @@ def main() -> None:
     parser.add_argument("--test-days", type=int, default=60)
     parser.add_argument("--min-train-days", type=int, default=252)
     parser.add_argument("--commission-bps", type=float, default=10.0)
+    parser.add_argument("--slippage-bps", type=float, default=5.0)
     parser.add_argument("--workers", type=int, default=8)
     parser.add_argument("--cache-dir", default="data/cache")
     parser.add_argument("--refresh-cache", action="store_true")
@@ -229,19 +239,40 @@ def main() -> None:
         depth=args.depth,
         learning_rate=args.learning_rate,
     )
+    advanced_signals = signal_quality_metrics(
+        predictions,
+        "signal",
+        "up_probability",
+        args.min_abs_return,
+    )
+    advanced_trading = trading_quality_metrics(
+        predictions,
+        "model_position",
+        args.commission_bps,
+        args.slippage_bps,
+    )
+    advanced_groups = grouped_signal_metrics(
+        predictions,
+        "signal",
+        "up_probability",
+        args.min_abs_return,
+    )
     report = {
         "created_at": datetime.now().isoformat(timespec="seconds"),
         "config": vars(args),
         "tickers_tested": sorted(predictions["ticker"].unique().tolist()),
         "skipped": skipped,
-        "signal_metrics": signal_metrics(
-            predictions, args.min_abs_return
+        "signal_metrics": advanced_signals,
+        "model_trading": advanced_trading,
+        "groups": advanced_groups,
+        "quality_gate": quality_gate(
+            advanced_signals, advanced_trading, advanced_groups
         ),
-        "model_trading": trading_metrics(
-            predictions, "model_position", args.commission_bps
-        ),
-        "momentum_trading": trading_metrics(
-            predictions, "momentum_position", args.commission_bps
+        "momentum_trading": trading_quality_metrics(
+            predictions,
+            "momentum_position",
+            args.commission_bps,
+            args.slippage_bps,
         ),
     }
 

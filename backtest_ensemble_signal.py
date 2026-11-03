@@ -8,10 +8,15 @@ from pathlib import Path
 import numpy as np
 import pandas as pd
 
-from backtest_binary_signal import signal_metrics, trading_metrics
 from ensemble_signal_model import (
     lightgbm_frame,
     train_ensemble_models,
+)
+from evaluation_metrics import (
+    grouped_signal_metrics,
+    quality_gate,
+    signal_quality_metrics,
+    trading_quality_metrics,
 )
 from signal_model import calibrate_probabilities, prepare_binary_dataset
 from tabular_features import FEATURE_COLUMNS
@@ -94,6 +99,9 @@ def run_walk_forward(
                 "target_date",
                 "target_return",
                 "strategy_return",
+                "market_return_20",
+                "market_volatility_20",
+                "log_turnover",
             ]
         ].copy()
         result["fold"] = fold
@@ -129,6 +137,7 @@ def main() -> None:
     parser.add_argument("--test-days", type=int, default=60)
     parser.add_argument("--min-train-days", type=int, default=252)
     parser.add_argument("--commission-bps", type=float, default=10.0)
+    parser.add_argument("--slippage-bps", type=float, default=5.0)
     parser.add_argument("--workers", type=int, default=8)
     parser.add_argument("--cache-dir", default="data/cache")
     parser.add_argument("--out-dir", default="reports")
@@ -162,18 +171,29 @@ def main() -> None:
         "models": {},
     }
     for name in ("catboost", "lightgbm", "ensemble"):
-        metric_frame = predictions.assign(
-            signal=predictions[f"{name}_signal"]
+        signals = signal_quality_metrics(
+            predictions,
+            f"{name}_signal",
+            f"{name}_up_probability",
+            args.min_abs_return,
+        )
+        trading = trading_quality_metrics(
+            predictions,
+            f"{name}_position",
+            args.commission_bps,
+            args.slippage_bps,
+        )
+        groups = grouped_signal_metrics(
+            predictions,
+            f"{name}_signal",
+            f"{name}_up_probability",
+            args.min_abs_return,
         )
         report["models"][name] = {
-            "signals": signal_metrics(
-                metric_frame, args.min_abs_return
-            ),
-            "trading": trading_metrics(
-                predictions,
-                f"{name}_position",
-                args.commission_bps,
-            ),
+            "signals": signals,
+            "trading": trading,
+            "groups": groups,
+            "quality_gate": quality_gate(signals, trading, groups),
         }
 
     timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")

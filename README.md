@@ -193,7 +193,9 @@ Walk-forward-бэктест обучает модель только на про
   --tickers all \
   --max-tickers 0 \
   --days 1500 \
-  --iterations 500
+  --iterations 500 \
+  --commission-bps 10 \
+  --slippage-bps 5
 
 .venv/bin/python train_ensemble_signal_model.py \
   --tickers all \
@@ -204,6 +206,11 @@ Walk-forward-бэктест обучает модель только на про
 LightGBM сохраняется в `models/stock_signal_lgbm.txt`. Он подключается к
 продуктовому инференсу только после прохождения свежей validation-проверки;
 текущий бот использует прошедшую проверку CatBoost-модель.
+
+Расширенный отчёт содержит precision/recall/coverage, log loss, Brier score,
+calibration error, bootstrap 95% CI, результаты по fold, годам, режимам рынка
+и ликвидности, а также автоматический quality gate. Модель не должна заменять
+текущую, если gate не пройден.
 
 ## Перенос модели в Flutter-приложение
 
