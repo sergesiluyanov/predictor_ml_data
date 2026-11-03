@@ -9,9 +9,11 @@ import re
 import threading
 
 from catboost import CatBoostClassifier
+from lightgbm import Booster
 import numpy as np
 import tensorflow as tf
 
+from ensemble_signal_model import lightgbm_frame
 from feature_pipeline import build_latest_input
 from moex_client import fetch_index_last_n_days, fetch_last_n_days
 from signal_model import calibrate_probabilities
@@ -230,6 +232,60 @@ def _get_binary_runner(model_path: Path) -> _BinarySignalRunner:
         return _BINARY_RUNNERS[resolved_path]
 
 
+class _LightGBMSignalRunner:
+    def __init__(self, model_path: Path):
+        self.model = Booster(model_file=str(model_path))
+        metadata_path = model_path.with_suffix(".json")
+        self.metadata = json.loads(
+            metadata_path.read_text(encoding="utf-8")
+        )
+        self.lock = threading.Lock()
+
+    def predict(
+        self, ticker: str, rows: list[dict], market_rows: list[dict]
+    ) -> tuple[str, float, float]:
+        features = latest_feature_row(rows, ticker, market_rows)
+        encoded = lightgbm_frame(
+            features, self.metadata["ticker_mapping"]
+        )
+        with self.lock:
+            raw_probability = float(self.model.predict(encoded)[0])
+        up_probability = float(
+            calibrate_probabilities(
+                np.asarray([raw_probability]),
+                float(self.metadata["calibration_coefficient"]),
+                float(self.metadata["calibration_intercept"]),
+            )[0]
+        )
+        policy = self.metadata["stable_warning_policy"]
+        market_volatility = float(
+            features["market_volatility_20"].iloc[0]
+        )
+        if market_volatility >= float(
+            policy["max_market_volatility_20"]
+        ):
+            return "none", up_probability, 1.0 - up_probability
+        down_probability = 1.0 - up_probability
+        if down_probability >= float(
+            policy["down_confidence_threshold"]
+        ):
+            return "down", up_probability, down_probability
+        return "none", up_probability, max(up_probability, down_probability)
+
+
+_LIGHTGBM_RUNNERS: dict[Path, _LightGBMSignalRunner] = {}
+
+
+def _get_lightgbm_runner(model_path: Path) -> _LightGBMSignalRunner:
+    resolved_path = model_path.resolve()
+    with _RUNNERS_LOCK:
+        if resolved_path not in _LIGHTGBM_RUNNERS:
+            _LIGHTGBM_RUNNERS[resolved_path] = _LightGBMSignalRunner(
+                resolved_path
+            )
+        return _LIGHTGBM_RUNNERS[resolved_path]
+
+
 def predict_stock(ticker_value: str, history_days: int = 730) -> StockPrediction:
     ticker = normalize_ticker(ticker_value)
     model_path = find_model(ticker)
@@ -264,19 +320,29 @@ def predict_stock(ticker_value: str, history_days: int = 730) -> StockPrediction
             signal = None
             signal_threshold = None
 
-        signal_model_path = Path("models/stock_signal.cbm")
-        if signal_model_path.is_file():
+        lightgbm_signal_path = Path("models/stock_signal_lgbm.txt")
+        catboost_signal_path = Path("models/stock_signal.cbm")
+        if lightgbm_signal_path.is_file() or catboost_signal_path.is_file():
             if market_rows is None:
                 market_rows = fetch_index_last_n_days(
                     "IMOEX", history_days
                 )
-            (
-                trading_signal,
-                trading_up_probability,
-                trading_confidence,
-            ) = _get_binary_runner(signal_model_path).predict(
-                ticker, rows, market_rows
-            )
+            if lightgbm_signal_path.is_file():
+                (
+                    trading_signal,
+                    trading_up_probability,
+                    trading_confidence,
+                ) = _get_lightgbm_runner(
+                    lightgbm_signal_path
+                ).predict(ticker, rows, market_rows)
+            else:
+                (
+                    trading_signal,
+                    trading_up_probability,
+                    trading_confidence,
+                ) = _get_binary_runner(
+                    catboost_signal_path
+                ).predict(ticker, rows, market_rows)
         else:
             trading_signal = None
             trading_up_probability = None

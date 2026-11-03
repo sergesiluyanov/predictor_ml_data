@@ -78,6 +78,11 @@ def main() -> None:
         "model_path": str(lightgbm_path),
         "ticker_mapping": metadata["ticker_mapping"],
         "lightgbm_features": metadata["lightgbm_features"],
+        "stable_warning_policy": {
+            "up_enabled": False,
+            "down_confidence_threshold": 0.55,
+            "max_market_volatility_20": 0.02,
+        },
         **metadata["lightgbm"],
     }
     ensemble_metadata = {

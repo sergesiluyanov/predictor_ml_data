@@ -1,5 +1,5 @@
 {
-  "created_at": "2026-11-03T19:08:26",
+  "created_at": "2026-11-03T19:23:52",
   "min_abs_return": 0.003,
   "max_abs_return": 0.25,
   "feature_columns": [
@@ -1618,6 +1618,11 @@
     "weekday_sin",
     "weekday_cos"
   ],
+  "stable_warning_policy": {
+    "up_enabled": false,
+    "down_confidence_threshold": 0.55,
+    "max_market_volatility_20": 0.02
+  },
   "calibration_coefficient": -0.09770163510649857,
   "calibration_intercept": -0.1788014616242918,
   "up_confidence_threshold": null,

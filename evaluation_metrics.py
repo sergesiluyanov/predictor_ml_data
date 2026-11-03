@@ -265,3 +265,41 @@ def quality_gate(
                 for value in values
             )
     return {"passed": all(checks.values()), "checks": checks}
+
+
+def warning_quality_gate(
+    signal_metrics: dict,
+    groups: dict,
+) -> dict:
+    """Gate для предупреждений направления без требования long-доходности."""
+    precision = signal_metrics.get("precision")
+    precision_interval = signal_metrics.get("precision_95_ci")
+    fold_values = list(groups.get("fold", {}).values())
+    active_regimes = [
+        value
+        for value in groups.get("market_regime", {}).values()
+        if value.get("signals", 0) >= 100
+    ]
+    checks = {
+        "precision_at_least_55_percent": (
+            precision is not None and precision >= 0.55
+        ),
+        "precision_ci_lower_at_least_55_percent": (
+            precision_interval is not None
+            and precision_interval[0] >= 0.55
+        ),
+        "coverage_at_least_2_percent": (
+            signal_metrics.get("coverage", 0.0) >= 0.02
+        ),
+        "signals_present_in_every_fold": bool(fold_values)
+        and all(value.get("signals", 0) > 0 for value in fold_values),
+        "active_regime_precision_at_least_55_percent": bool(
+            active_regimes
+        )
+        and all(
+            value.get("precision") is not None
+            and value["precision"] >= 0.55
+            for value in active_regimes
+        ),
+    }
+    return {"passed": all(checks.values()), "checks": checks}

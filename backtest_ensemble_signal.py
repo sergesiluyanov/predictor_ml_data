@@ -17,6 +17,7 @@ from evaluation_metrics import (
     quality_gate,
     signal_quality_metrics,
     trading_quality_metrics,
+    warning_quality_gate,
 )
 from signal_model import calibrate_probabilities, prepare_binary_dataset
 from tabular_features import FEATURE_COLUMNS
@@ -138,6 +139,12 @@ def main() -> None:
     parser.add_argument("--min-train-days", type=int, default=252)
     parser.add_argument("--commission-bps", type=float, default=10.0)
     parser.add_argument("--slippage-bps", type=float, default=5.0)
+    parser.add_argument(
+        "--stable-down-threshold", type=float, default=0.55
+    )
+    parser.add_argument(
+        "--max-signal-volatility", type=float, default=0.02
+    )
     parser.add_argument("--workers", type=int, default=8)
     parser.add_argument("--cache-dir", default="data/cache")
     parser.add_argument("--out-dir", default="reports")
@@ -170,11 +177,30 @@ def main() -> None:
         "skipped": skipped,
         "models": {},
     }
-    for name in ("catboost", "lightgbm", "ensemble"):
+    # Политика стабильных предупреждений задаётся до оценки test-части.
+    stable_down = (
+        predictions["lightgbm_up_probability"]
+        <= 1.0 - args.stable_down_threshold
+    ) & (
+        predictions["market_volatility_20"]
+        < args.max_signal_volatility
+    )
+    predictions["lightgbm_stable_signal"] = np.where(
+        stable_down, "down", "none"
+    )
+    predictions["lightgbm_stable_position"] = 0
+
+    model_specs = (
+        ("catboost", "catboost_up_probability"),
+        ("lightgbm", "lightgbm_up_probability"),
+        ("ensemble", "ensemble_up_probability"),
+        ("lightgbm_stable", "lightgbm_up_probability"),
+    )
+    for name, probability_column in model_specs:
         signals = signal_quality_metrics(
             predictions,
             f"{name}_signal",
-            f"{name}_up_probability",
+            probability_column,
             args.min_abs_return,
         )
         trading = trading_quality_metrics(
@@ -186,7 +212,7 @@ def main() -> None:
         groups = grouped_signal_metrics(
             predictions,
             f"{name}_signal",
-            f"{name}_up_probability",
+            probability_column,
             args.min_abs_return,
         )
         report["models"][name] = {
@@ -195,6 +221,10 @@ def main() -> None:
             "groups": groups,
             "quality_gate": quality_gate(signals, trading, groups),
         }
+        if name == "lightgbm_stable":
+            report["models"][name]["warning_quality_gate"] = (
+                warning_quality_gate(signals, groups)
+            )
 
     timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
     output_dir = Path(args.out_dir)

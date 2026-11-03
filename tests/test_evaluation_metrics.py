@@ -8,6 +8,7 @@ from evaluation_metrics import (
     quality_gate,
     signal_quality_metrics,
     trading_quality_metrics,
+    warning_quality_gate,
 )
 
 
@@ -56,6 +57,23 @@ class EvaluationMetricTests(unittest.TestCase):
             "profitable_ticker_share": 0.6,
         }
         self.assertFalse(quality_gate(signals, trading)["passed"])
+
+    def test_warning_gate_does_not_require_long_return(self):
+        signals = {
+            "precision": 0.6,
+            "precision_95_ci": [0.56, 0.64],
+            "coverage": 0.1,
+        }
+        groups = {
+            "fold": {
+                "1": {"signals": 100},
+                "2": {"signals": 100},
+            },
+            "market_regime": {
+                "sideways": {"signals": 100, "precision": 0.6}
+            },
+        }
+        self.assertTrue(warning_quality_gate(signals, groups)["passed"])
 
 
 if __name__ == "__main__":
