@@ -45,12 +45,13 @@ def _forecast_text(prediction: StockPrediction) -> str:
     probability_text = ""
     if prediction.probabilities:
         confidence = max(prediction.probabilities.values())
+        signal_threshold = prediction.signal_threshold or 0.55
         signal_names = {
             "up": "рост",
             "flat": "боковик",
             "down": "падение",
         }
-        if confidence >= 0.55 and prediction.signal:
+        if confidence >= signal_threshold and prediction.signal:
             signal_text = (
                 f"Сигнал: <b>{signal_names[prediction.signal]}</b> "
                 f"({confidence:.1%})"

@@ -36,6 +36,7 @@ class StockPrediction:
     model_path: str
     probabilities: dict[str, float] | None = None
     signal: str | None = None
+    signal_threshold: float | None = None
 
 
 def normalize_ticker(value: str) -> str:
@@ -130,7 +131,7 @@ class _DirectionModelRunner:
 
     def predict(
         self, ticker: str, rows: list[dict], market_rows: list[dict]
-    ) -> tuple[float, dict[str, float], str]:
+    ) -> tuple[float, dict[str, float], str, float]:
         features = latest_feature_row(rows, ticker, market_rows)
         with self.lock:
             raw_probabilities = self.model.predict_proba(features)[0]
@@ -150,7 +151,15 @@ class _DirectionModelRunner:
             for class_id in CLASS_NAMES
         )
         signal_id = max(by_class, key=by_class.get)
-        return predicted_return, probabilities, CLASS_NAMES[signal_id]
+        signal_threshold = float(
+            self.metadata.get("recommended_probability_threshold", 0.55)
+        )
+        return (
+            predicted_return,
+            probabilities,
+            CLASS_NAMES[signal_id],
+            signal_threshold,
+        )
 
 
 _DIRECTION_RUNNERS: dict[Path, _DirectionModelRunner] = {}
@@ -185,6 +194,7 @@ def predict_stock(ticker_value: str, history_days: int = 730) -> StockPrediction
                 predicted_return,
                 probabilities,
                 signal,
+                signal_threshold,
             ) = _get_direction_runner(model_path).predict(
                 ticker, rows, market_rows
             )
@@ -196,6 +206,7 @@ def predict_stock(ticker_value: str, history_days: int = 730) -> StockPrediction
             predicted_return = _get_runner(model_path).predict(features)
             probabilities = None
             signal = None
+            signal_threshold = None
     except PredictionError:
         raise
     except Exception as exc:
@@ -215,4 +226,5 @@ def predict_stock(ticker_value: str, history_days: int = 730) -> StockPrediction
         model_path=str(model_path),
         probabilities=probabilities,
         signal=signal,
+        signal_threshold=signal_threshold,
     )

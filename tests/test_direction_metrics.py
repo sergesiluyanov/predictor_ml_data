@@ -20,7 +20,7 @@ class DirectionMetricTests(unittest.TestCase):
             {
                 "ticker": ["AAA", "AAA"],
                 "target_date": ["2026-01-01", "2026-01-02"],
-                "actual_return": [0.01, 0.0],
+                "strategy_return": [0.01, 0.0],
                 "position": [1, 0],
             }
         )

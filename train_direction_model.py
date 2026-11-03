@@ -9,10 +9,9 @@ from catboost import CatBoostClassifier
 import numpy as np
 import pandas as pd
 
+from data_loader import load_index_history, load_ticker_histories
 from moex_client import (
     DEFAULT_LIQUID_TICKERS,
-    fetch_index_last_n_days,
-    fetch_last_n_days,
     fetch_liquid_tickers_full,
 )
 from tabular_features import (
@@ -33,7 +32,7 @@ def parse_tickers(value: str, max_tickers: int) -> list[str]:
     tickers = fetch_liquid_tickers_full()
     if not tickers:
         tickers = list(DEFAULT_LIQUID_TICKERS)
-    return tickers[:max_tickers]
+    return tickers[:max_tickers] if max_tickers > 0 else tickers
 
 
 def train_model(
@@ -55,7 +54,6 @@ def train_model(
         learning_rate=learning_rate,
         loss_function="MultiClass",
         eval_metric="MultiClass",
-        auto_class_weights="Balanced",
         random_seed=42,
         l2_leaf_reg=5.0,
         random_strength=0.5,
@@ -74,7 +72,9 @@ def train_model(
         use_best_model=True,
     )
 
-    prediction = model.predict(validation[FEATURE_COLUMNS]).reshape(-1).astype(int)
+    probabilities = model.predict_proba(validation[FEATURE_COLUMNS])
+    model_classes = np.asarray(model.classes_, dtype=int)
+    prediction = model_classes[np.argmax(probabilities, axis=1)]
     actual = validation["target_class"].to_numpy(dtype=int)
     accuracy = float(np.mean(prediction == actual))
     per_class_accuracy = {}
@@ -94,6 +94,46 @@ def train_model(
         )
         for class_id in CLASS_NAMES
     }
+    class_to_column = {
+        int(class_id): index
+        for index, class_id in enumerate(model_classes)
+    }
+    up_probability = probabilities[:, class_to_column[2]]
+    threshold_scores = {}
+    for probability_threshold in (0.40, 0.45, 0.50, 0.55, 0.60):
+        validation_copy = validation[
+            ["ticker", "target_date", "strategy_return"]
+        ].copy()
+        validation_copy["position"] = (
+            up_probability >= probability_threshold
+        ).astype(float)
+        ticker_returns = []
+        active_days = 0
+        for _, ticker_frame in validation_copy.groupby("ticker"):
+            ticker_frame = ticker_frame.sort_values("target_date")
+            position = ticker_frame["position"].to_numpy()
+            returns = ticker_frame["strategy_return"].to_numpy()
+            turnover = np.abs(np.diff(position, prepend=0.0))
+            net = position * returns - turnover * 0.001
+            ticker_returns.append(float(np.prod(1.0 + net) - 1.0))
+            active_days += int(position.sum())
+        threshold_scores[str(probability_threshold)] = {
+            "mean_ticker_return": float(np.mean(ticker_returns)),
+            "active_days": active_days,
+        }
+    eligible_thresholds = {
+        threshold: values
+        for threshold, values in threshold_scores.items()
+        if values["active_days"] >= 50
+    }
+    selected_threshold = float(
+        max(
+            eligible_thresholds or threshold_scores,
+            key=lambda threshold: (
+                eligible_thresholds or threshold_scores
+            )[threshold]["mean_ticker_return"],
+        )
+    )
     metrics = {
         "train_rows": int(len(train)),
         "validation_rows": int(len(validation)),
@@ -101,6 +141,8 @@ def train_model(
         "validation_accuracy": accuracy,
         "validation_per_class_accuracy": per_class_accuracy,
         "class_mean_returns": class_returns,
+        "probability_threshold_scores": threshold_scores,
+        "recommended_probability_threshold": selected_threshold,
         "best_iteration": int(model.get_best_iteration()),
     }
     return model, metrics
@@ -111,28 +153,59 @@ def main() -> None:
         description="Обучение CatBoost-классификатора down/flat/up"
     )
     parser.add_argument("--tickers", default="all")
-    parser.add_argument("--max-tickers", type=int, default=50)
+    parser.add_argument(
+        "--max-tickers",
+        type=int,
+        default=0,
+        help="0 — все тикеры",
+    )
     parser.add_argument("--days", type=int, default=1500)
     parser.add_argument("--threshold", type=float, default=0.003)
+    parser.add_argument(
+        "--volatility-threshold-multiplier",
+        type=float,
+        default=0.0,
+    )
+    parser.add_argument("--max-abs-return", type=float, default=0.25)
     parser.add_argument("--iterations", type=int, default=500)
     parser.add_argument("--depth", type=int, default=6)
     parser.add_argument("--learning-rate", type=float, default=0.05)
     parser.add_argument(
         "--out", default="models/stock_direction.cbm"
     )
+    parser.add_argument("--workers", type=int, default=8)
+    parser.add_argument("--cache-dir", default="data/cache")
+    parser.add_argument("--refresh-cache", action="store_true")
     args = parser.parse_args()
 
     tickers = parse_tickers(args.tickers, args.max_tickers)
     print("Загрузка IMOEX...")
-    market_rows = fetch_index_last_n_days("IMOEX", args.days)
+    market_rows = load_index_history(
+        args.days, args.cache_dir, args.refresh_cache
+    )
+    histories, load_errors = load_ticker_histories(
+        tickers=tickers,
+        days=args.days,
+        workers=args.workers,
+        cache_dir=args.cache_dir,
+        refresh=args.refresh_cache,
+    )
     frames = []
-    skipped = []
-    for index, ticker in enumerate(tickers, start=1):
-        print(f"[{index}/{len(tickers)}] {ticker}")
+    skipped = list(load_errors)
+    for ticker in tickers:
+        rows = histories.get(ticker, [])
+        if not rows:
+            if not any(item["ticker"] == ticker for item in skipped):
+                skipped.append({"ticker": ticker, "reason": "нет данных"})
+            continue
         try:
-            rows = fetch_last_n_days(ticker, args.days)
             frame = build_training_frame(
-                rows, ticker, market_rows, args.threshold
+                rows,
+                ticker,
+                market_rows,
+                args.threshold,
+                args.volatility_threshold_multiplier,
+                args.max_abs_return,
             )
         except Exception as exc:
             skipped.append({"ticker": ticker, "reason": str(exc)})
@@ -161,6 +234,10 @@ def main() -> None:
         "model_type": "catboost_direction_3class",
         "model_path": str(output_path),
         "threshold": args.threshold,
+        "volatility_threshold_multiplier": (
+            args.volatility_threshold_multiplier
+        ),
+        "max_abs_return": args.max_abs_return,
         "feature_columns": FEATURE_COLUMNS,
         "categorical_features": CATEGORICAL_FEATURES,
         "class_names": {str(key): value for key, value in CLASS_NAMES.items()},

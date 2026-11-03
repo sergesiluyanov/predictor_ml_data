@@ -17,6 +17,7 @@ def make_rows(count: int) -> list[dict]:
             if index < 31
             else f"2026-02-{index - 30:02d}",
             "close": 100.0 + index * 0.2 + np.sin(index),
+            "open": 99.9 + index * 0.2 + np.sin(index),
             "high": 101.0 + index * 0.2 + np.sin(index),
             "low": 99.0 + index * 0.2 + np.sin(index),
             "volume": 1_000_000.0 + index * 1000,

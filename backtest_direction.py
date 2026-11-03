@@ -13,7 +13,7 @@ import matplotlib.pyplot as plt
 import numpy as np
 import pandas as pd
 
-from moex_client import fetch_index_last_n_days, fetch_last_n_days
+from data_loader import load_index_history, load_ticker_histories
 from tabular_features import (
     CLASS_NAMES,
     FEATURE_COLUMNS,
@@ -55,7 +55,7 @@ def trading_metrics(
     for _, ticker_frame in predictions.groupby("ticker"):
         ticker_frame = ticker_frame.sort_values("target_date")
         position = ticker_frame[position_column].to_numpy(dtype=float)
-        actual = ticker_frame["actual_return"].to_numpy(dtype=float)
+        actual = ticker_frame["strategy_return"].to_numpy(dtype=float)
         turnover = np.abs(np.diff(position, prepend=0.0))
         net = position * actual - turnover * (commission_bps / 10_000.0)
         returns.append(float(np.prod(1.0 + net) - 1.0))
@@ -73,16 +73,32 @@ def build_dataset(
     tickers: list[str],
     days: int,
     threshold: float,
+    volatility_threshold_multiplier: float,
+    max_abs_return: float,
+    workers: int,
+    cache_dir: str,
+    refresh_cache: bool,
 ) -> tuple[pd.DataFrame, list[dict]]:
-    market_rows = fetch_index_last_n_days("IMOEX", days)
+    market_rows = load_index_history(days, cache_dir, refresh_cache)
+    histories, load_errors = load_ticker_histories(
+        tickers, days, workers, cache_dir, refresh_cache
+    )
     frames = []
-    skipped = []
-    for index, ticker in enumerate(tickers, start=1):
-        print(f"[{index}/{len(tickers)}] Данные {ticker}...", flush=True)
+    skipped = list(load_errors)
+    for ticker in tickers:
+        rows = histories.get(ticker, [])
+        if not rows:
+            if not any(item["ticker"] == ticker for item in skipped):
+                skipped.append({"ticker": ticker, "reason": "нет данных"})
+            continue
         try:
-            rows = fetch_last_n_days(ticker, days)
             frame = build_training_frame(
-                rows, ticker, market_rows, threshold
+                rows,
+                ticker,
+                market_rows,
+                threshold,
+                volatility_threshold_multiplier,
+                max_abs_return,
             )
         except Exception as exc:
             skipped.append({"ticker": ticker, "reason": str(exc)})
@@ -110,7 +126,6 @@ def run_walk_forward(
     depth: int,
     learning_rate: float,
     probability_threshold: float,
-    class_threshold: float,
 ) -> pd.DataFrame:
     dates = np.asarray(sorted(dataset["target_date"].unique()))
     if len(dates) < min_train_days + test_days:
@@ -134,7 +149,7 @@ def run_walk_forward(
             f"{dates[start]}..{dates[end - 1]}",
             flush=True,
         )
-        model, _ = train_model(
+        model, training_metrics = train_model(
             train,
             iterations=iterations,
             depth=depth,
@@ -156,7 +171,9 @@ def run_walk_forward(
                 "current_price",
                 "target_price",
                 "target_return",
+                "strategy_return",
                 "target_class",
+                "target_threshold",
                 "return_1",
             ]
         ].copy()
@@ -166,14 +183,22 @@ def run_walk_forward(
         result["prob_up"] = probabilities[:, class_to_column[2]]
         result["model_class"] = classes[np.argmax(probabilities, axis=1)]
         result["momentum_class"] = classify_returns(
-            result["return_1"], class_threshold
+            result["return_1"], result["target_threshold"]
         ).to_numpy()
         result["flat_class"] = 1
+        fold_probability_threshold = (
+            probability_threshold
+            if probability_threshold > 0
+            else training_metrics["recommended_probability_threshold"]
+        )
+        result["signal_probability_threshold"] = (
+            fold_probability_threshold
+        )
         result["model_position"] = (
-            result["prob_up"] >= probability_threshold
+            result["prob_up"] >= fold_probability_threshold
         ).astype(int)
         result["momentum_position"] = (
-            result["return_1"] > class_threshold
+            result["return_1"] > result["target_threshold"]
         ).astype(int)
         result = result.rename(columns={"target_return": "actual_return"})
         fold_frames.append(result)
@@ -194,7 +219,7 @@ def save_chart(
         for _, frame in predictions.groupby("ticker"):
             frame = frame.sort_values("target_date")
             position = frame[position_column].to_numpy(dtype=float)
-            actual = frame["actual_return"].to_numpy(dtype=float)
+            actual = frame["strategy_return"].to_numpy(dtype=float)
             turnover = np.abs(np.diff(position, prepend=0.0))
             net = (
                 position * actual
@@ -224,10 +249,23 @@ def main() -> None:
         "--tickers",
         default="SBER,GAZP,LKOH,GMKN,NVTK,ROSN,TATN,MOEX,CHMF,IRAO",
     )
-    parser.add_argument("--max-tickers", type=int, default=20)
+    parser.add_argument(
+        "--max-tickers", type=int, default=0, help="0 — все тикеры"
+    )
     parser.add_argument("--days", type=int, default=1500)
     parser.add_argument("--threshold", type=float, default=0.003)
-    parser.add_argument("--probability-threshold", type=float, default=0.55)
+    parser.add_argument(
+        "--volatility-threshold-multiplier",
+        type=float,
+        default=0.0,
+    )
+    parser.add_argument("--max-abs-return", type=float, default=0.25)
+    parser.add_argument(
+        "--probability-threshold",
+        type=float,
+        default=-1.0,
+        help="<=0 — выбирать на внутренней validation-выборке",
+    )
     parser.add_argument("--iterations", type=int, default=300)
     parser.add_argument("--depth", type=int, default=6)
     parser.add_argument("--learning-rate", type=float, default=0.05)
@@ -236,10 +274,22 @@ def main() -> None:
     parser.add_argument("--min-train-days", type=int, default=252)
     parser.add_argument("--commission-bps", type=float, default=10.0)
     parser.add_argument("--out-dir", default="reports")
+    parser.add_argument("--workers", type=int, default=8)
+    parser.add_argument("--cache-dir", default="data/cache")
+    parser.add_argument("--refresh-cache", action="store_true")
     args = parser.parse_args()
 
     tickers = parse_tickers(args.tickers, args.max_tickers)
-    dataset, skipped = build_dataset(tickers, args.days, args.threshold)
+    dataset, skipped = build_dataset(
+        tickers,
+        args.days,
+        args.threshold,
+        args.volatility_threshold_multiplier,
+        args.max_abs_return,
+        args.workers,
+        args.cache_dir,
+        args.refresh_cache,
+    )
     predictions = run_walk_forward(
         dataset=dataset,
         folds=args.folds,
@@ -249,7 +299,6 @@ def main() -> None:
         depth=args.depth,
         learning_rate=args.learning_rate,
         probability_threshold=args.probability_threshold,
-        class_threshold=args.threshold,
     )
 
     actual = predictions["target_class"].to_numpy(dtype=int)

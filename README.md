@@ -21,9 +21,10 @@ pip install -r requirements.txt
 Используется публичный ISS API Московской биржи (без ключа):
 
 - **История торгов (акции):**  
-  `https://iss.moex.com/iss/history/engines/stock/markets/shares/securities/{TICKER}.json?from=YYYY-MM-DD&till=YYYY-MM-DD&start=0&iss.meta=off&iss.json=extended`
+  `https://iss.moex.com/iss/history/engines/stock/markets/shares/boards/TQBR/securities/{TICKER}.json?from=YYYY-MM-DD&till=YYYY-MM-DD&start=0&iss.meta=off&iss.json=extended`
 
-Модуль `moex_client.py` повторяет логику Flutter-приложения: пагинация по 100 записей, поля `TRADEDATE`, `CLOSE`, `VOLUME`, `HIGH`, `LOW`, дедупликация по дате.
+Модуль `moex_client.py` использует только основную площадку TQBR: пагинация
+по 100 записей, поля `TRADEDATE`, `OPEN`, `CLOSE`, `VOLUME`, `HIGH`, `LOW`.
 
 ### Пример загрузки данных
 
@@ -93,8 +94,10 @@ TELEGRAM_BOT_TOKEN=ваш_токен
 
 ```bash
 python train_direction_model.py \
-  --tickers SBER,GAZP,LKOH,GMKN,NVTK,ROSN,TATN,MOEX,CHMF,IRAO \
+  --tickers all \
+  --max-tickers 0 \
   --days 1500 \
+  --volatility-threshold-multiplier 0 \
   --out models/stock_direction.cbm
 python bot.py
 ```
@@ -146,15 +149,18 @@ Walk-forward-бэктест обучает модель только на про
 
 ```bash
 .venv/bin/python backtest_direction.py \
-  --tickers SBER,GAZP,LKOH,GMKN,NVTK,ROSN,TATN,MOEX,CHMF,IRAO \
+  --tickers all \
+  --max-tickers 0 \
   --days 1500 \
-  --iterations 300 \
+  --iterations 500 \
+  --volatility-threshold-multiplier 0 \
   --folds 3
 ```
 
 Цель модели: `down`, `flat` или `up` с порогом дневного изменения 0,3%.
 Признаки включают доходности разных горизонтов, волатильность, SMA, RSI, ATR,
 объём, диапазон дня, календарные признаки и динамику индекса IMOEX.
+Для повторных запусков история кэшируется в `data/cache/`.
 Зафиксированные результаты экспериментов приведены в
 [`QUALITY_REPORT.md`](QUALITY_REPORT.md).
 

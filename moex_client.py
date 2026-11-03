@@ -13,7 +13,10 @@ REQUEST_RETRIES = 3
 REQUEST_RETRY_DELAY = 2
 
 
-BASE_URL = "https://iss.moex.com/iss/history/engines/stock/markets/shares/securities"
+BASE_URL = (
+    "https://iss.moex.com/iss/history/engines/stock/markets/shares/"
+    "boards/TQBR/securities"
+)
 INDEX_BASE_URL = "https://iss.moex.com/iss/history/engines/stock/markets/index/securities"
 SECURITIES_LIST_URL = "https://iss.moex.com/iss/engines/stock/markets/shares/securities.json"
 # Основная площадка TQBR — самые ликвидные акции (режим основных торгов)
@@ -106,6 +109,7 @@ def _fetch_history(
                 all_rows.append({
                     "tradedate": str(tradedate),
                     "close": float(close),
+                    "open": float(item["OPEN"]) if item.get("OPEN") is not None else None,
                     "volume": float(item["VOLUME"]) if item.get("VOLUME") is not None else None,
                     "high": float(item["HIGH"]) if item.get("HIGH") is not None else None,
                     "low": float(item["LOW"]) if item.get("LOW") is not None else None,

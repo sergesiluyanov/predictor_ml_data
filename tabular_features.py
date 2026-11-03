@@ -23,6 +23,8 @@ NUMERIC_FEATURES = [
     "range_pct",
     "volume_change",
     "volume_z_20",
+    "log_turnover",
+    "zero_volume_ratio_20",
     "market_return_1",
     "market_return_5",
     "market_return_20",
@@ -36,7 +38,9 @@ FEATURE_COLUMNS = CATEGORICAL_FEATURES + NUMERIC_FEATURES
 CLASS_NAMES = {0: "down", 1: "flat", 2: "up"}
 
 
-def classify_returns(values: pd.Series, threshold: float) -> pd.Series:
+def classify_returns(
+    values: pd.Series, threshold: float | pd.Series
+) -> pd.Series:
     return pd.Series(
         np.where(values > threshold, 2, np.where(values < -threshold, 0, 1)),
         index=values.index,
@@ -84,6 +88,9 @@ def build_feature_frame(
     low = frame["low"].fillna(frame["close"]).astype(float)
     volume = frame["volume"].fillna(0.0).astype(float)
     daily_return = close.pct_change()
+    frame["_max_abs_return_20"] = (
+        daily_return.abs().rolling(20).max()
+    )
 
     frame["ticker"] = ticker
     for period in (1, 3, 5, 10, 20):
@@ -119,6 +126,10 @@ def build_feature_frame(
         [np.inf, -np.inf], np.nan
     )
     frame["volume_z_20"] = (log_volume - volume_mean) / volume_std
+    frame["log_turnover"] = np.log1p(close * volume)
+    frame["zero_volume_ratio_20"] = (
+        (volume <= 0).astype(float).rolling(20).mean()
+    )
 
     frame = frame.merge(_market_frame(market_rows), on="tradedate", how="left")
     for column in (
@@ -148,6 +159,8 @@ def build_training_frame(
     ticker: str,
     market_rows: list[dict] | None,
     threshold: float,
+    volatility_threshold_multiplier: float = 0.0,
+    max_abs_return: float = 0.25,
 ) -> pd.DataFrame:
     """Добавляет доходность и класс следующего торгового дня."""
     frame = build_feature_frame(rows, ticker, market_rows)
@@ -155,27 +168,45 @@ def build_training_frame(
         return frame
     frame["current_price"] = frame["close"].astype(float)
     frame["target_price"] = frame["close"].shift(-1).astype(float)
+    frame["target_open"] = frame["open"].shift(-1).astype(float)
     frame["target_date"] = frame["tradedate"].shift(-1)
     frame["target_return"] = frame["target_price"] / frame["current_price"] - 1.0
+    frame["strategy_return"] = (
+        frame["target_price"] / frame["target_open"] - 1.0
+    )
     valid_target = frame["target_return"].notna()
+    frame["target_threshold"] = np.maximum(
+        threshold,
+        frame["volatility_20"] * volatility_threshold_multiplier,
+    )
     frame.loc[valid_target, "target_class"] = classify_returns(
-        frame.loc[valid_target, "target_return"], threshold
+        frame.loc[valid_target, "target_return"],
+        frame.loc[valid_target, "target_threshold"],
     )
     required = FEATURE_COLUMNS + [
         "target_return",
+        "strategy_return",
         "target_class",
         "target_date",
     ]
-    return frame.dropna(subset=required).reset_index(drop=True)
+    valid = frame.dropna(subset=required)
+    valid = valid[
+        (valid["target_return"].abs() <= max_abs_return)
+        & (valid["strategy_return"].abs() <= max_abs_return)
+        & (valid["_max_abs_return_20"] <= max_abs_return)
+    ]
+    return valid.reset_index(drop=True)
 
 
 def latest_feature_row(
     rows: list[dict],
     ticker: str,
     market_rows: list[dict] | None,
+    max_abs_return: float = 0.25,
 ) -> pd.DataFrame:
     frame = build_feature_frame(rows, ticker, market_rows)
     valid = frame.dropna(subset=FEATURE_COLUMNS)
+    valid = valid[valid["_max_abs_return_20"] <= max_abs_return]
     if valid.empty:
         raise ValueError("Недостаточно истории для расчёта признаков.")
     return valid.iloc[[-1]][FEATURE_COLUMNS]
