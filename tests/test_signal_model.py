@@ -3,12 +3,14 @@ import unittest
 import numpy as np
 import pandas as pd
 
+from ensemble_signal_model import build_ticker_mapping, lightgbm_frame
 from signal_model import (
     calibrate_probabilities,
     evaluate_confidence_thresholds,
     prepare_binary_dataset,
     select_direction_thresholds,
 )
+from tabular_features import NUMERIC_FEATURES
 
 
 class SignalModelTests(unittest.TestCase):
@@ -50,6 +52,18 @@ class SignalModelTests(unittest.TestCase):
         )
         self.assertIsNone(up_threshold)
         self.assertEqual(down_threshold, 0.55)
+
+    def test_lightgbm_unknown_ticker_has_fallback_code(self):
+        numeric = {
+            column: [0.0, 0.0]
+            for column in NUMERIC_FEATURES
+        }
+        frame = pd.DataFrame(
+            {"ticker": ["AAA", "BBB"], **numeric}
+        )
+        mapping = build_ticker_mapping(frame.iloc[[0]])
+        encoded = lightgbm_frame(frame, mapping)
+        self.assertEqual(encoded["ticker_code"].tolist(), [0, -1])
 
 
 if __name__ == "__main__":

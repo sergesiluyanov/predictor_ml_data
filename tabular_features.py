@@ -21,15 +21,23 @@ NUMERIC_FEATURES = [
     "rsi_14",
     "atr_14",
     "range_pct",
+    "overnight_gap",
+    "intraday_return",
+    "close_position",
     "volume_change",
     "volume_z_20",
     "log_turnover",
+    "turnover_change",
+    "turnover_z_20",
     "zero_volume_ratio_20",
     "market_return_1",
     "market_return_5",
     "market_return_20",
+    "market_mean_return_5",
     "market_volatility_20",
+    "market_sma_gap_20",
     "relative_return_5",
+    "relative_volatility_20",
     "weekday_sin",
     "weekday_cos",
 ]
@@ -56,7 +64,9 @@ def _market_frame(market_rows: list[dict] | None) -> pd.DataFrame:
                 "market_return_1",
                 "market_return_5",
                 "market_return_20",
+                "market_mean_return_5",
                 "market_volatility_20",
+                "market_sma_gap_20",
             ]
         )
     market = pd.DataFrame(market_rows).sort_values("tradedate")
@@ -68,7 +78,11 @@ def _market_frame(market_rows: list[dict] | None) -> pd.DataFrame:
             "market_return_1": market_return,
             "market_return_5": market_close.pct_change(5),
             "market_return_20": market_close.pct_change(20),
+            "market_mean_return_5": market_return.rolling(5).mean(),
             "market_volatility_20": market_return.rolling(20).std(),
+            "market_sma_gap_20": (
+                market_close / market_close.rolling(20).mean() - 1.0
+            ),
         }
     )
 
@@ -84,6 +98,7 @@ def build_feature_frame(
 
     frame = pd.DataFrame(rows).sort_values("tradedate").reset_index(drop=True)
     close = frame["close"].astype(float)
+    open_price = frame["open"].fillna(frame["close"]).astype(float)
     high = frame["high"].fillna(frame["close"]).astype(float)
     low = frame["low"].fillna(frame["close"]).astype(float)
     volume = frame["volume"].fillna(0.0).astype(float)
@@ -118,6 +133,10 @@ def build_feature_frame(
     ).max(axis=1)
     frame["atr_14"] = true_range.rolling(14).mean() / close
     frame["range_pct"] = (high - low) / close
+    frame["overnight_gap"] = open_price / previous_close - 1.0
+    frame["intraday_return"] = close / open_price - 1.0
+    day_range = (high - low).replace(0.0, np.nan)
+    frame["close_position"] = ((close - low) / day_range).fillna(0.5)
 
     log_volume = np.log1p(volume)
     volume_mean = log_volume.rolling(20).mean()
@@ -126,7 +145,16 @@ def build_feature_frame(
         [np.inf, -np.inf], np.nan
     )
     frame["volume_z_20"] = (log_volume - volume_mean) / volume_std
-    frame["log_turnover"] = np.log1p(close * volume)
+    turnover = close * volume
+    log_turnover = np.log1p(turnover)
+    frame["log_turnover"] = log_turnover
+    frame["turnover_change"] = turnover.pct_change().replace(
+        [np.inf, -np.inf], np.nan
+    )
+    frame["turnover_z_20"] = (
+        (log_turnover - log_turnover.rolling(20).mean())
+        / log_turnover.rolling(20).std().replace(0.0, np.nan)
+    )
     frame["zero_volume_ratio_20"] = (
         (volume <= 0).astype(float).rolling(20).mean()
     )
@@ -136,12 +164,18 @@ def build_feature_frame(
         "market_return_1",
         "market_return_5",
         "market_return_20",
+        "market_mean_return_5",
         "market_volatility_20",
+        "market_sma_gap_20",
     ):
         frame[column] = frame[column].fillna(0.0)
     frame["relative_return_5"] = (
         frame["return_5"] - frame["market_return_5"]
     )
+    frame["relative_volatility_20"] = (
+        frame["volatility_20"]
+        / frame["market_volatility_20"].replace(0.0, np.nan)
+    ).fillna(1.0)
 
     dates = pd.to_datetime(frame["tradedate"])
     frame["weekday_sin"] = np.sin(

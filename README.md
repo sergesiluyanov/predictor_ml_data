@@ -186,6 +186,25 @@ Walk-forward-бэктест обучает модель только на про
   --out models/stock_signal.cbm
 ```
 
+Сравнение CatBoost, LightGBM и ансамбля:
+
+```bash
+.venv/bin/python backtest_ensemble_signal.py \
+  --tickers all \
+  --max-tickers 0 \
+  --days 1500 \
+  --iterations 500
+
+.venv/bin/python train_ensemble_signal_model.py \
+  --tickers all \
+  --max-tickers 0 \
+  --days 1500
+```
+
+LightGBM сохраняется в `models/stock_signal_lgbm.txt`. Он подключается к
+продуктовому инференсу только после прохождения свежей validation-проверки;
+текущий бот использует прошедшую проверку CatBoost-модель.
+
 ## Перенос модели в Flutter-приложение
 
 1. Скопируйте `stock_model.tflite` в проект:
@@ -211,8 +230,10 @@ predictor_ml_data/
   tabular_features.py  # Признаки CatBoost
   train_direction_model.py
   train_binary_signal_model.py
+  train_ensemble_signal_model.py
   backtest_direction.py
   backtest_binary_signal.py
+  backtest_ensemble_signal.py
   backtest.py
   moex_client.py       # Клиент MOEX ISS API
   train_stock_model.py  # Обучение + экспорт .tflite

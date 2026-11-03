@@ -1,5 +1,5 @@
 {
-  "created_at": "2026-11-03T17:40:11",
+  "created_at": "2026-11-03T19:09:08",
   "model_type": "catboost_direction_3class",
   "model_path": "models/stock_direction.cbm",
   "threshold": 0.003,
@@ -23,15 +23,23 @@
     "rsi_14",
     "atr_14",
     "range_pct",
+    "overnight_gap",
+    "intraday_return",
+    "close_position",
     "volume_change",
     "volume_z_20",
     "log_turnover",
+    "turnover_change",
+    "turnover_z_20",
     "zero_volume_ratio_20",
     "market_return_1",
     "market_return_5",
     "market_return_20",
+    "market_mean_return_5",
     "market_volatility_20",
+    "market_sma_gap_20",
     "relative_return_5",
+    "relative_volatility_20",
     "weekday_sin",
     "weekday_cos"
   ],
@@ -1331,11 +1339,11 @@
   "train_rows": 183923,
   "validation_rows": 51253,
   "validation_start": "2026-01-15",
-  "validation_accuracy": 0.4601681852769594,
+  "validation_accuracy": 0.46496790431779605,
   "validation_per_class_accuracy": {
-    "down": 0.6534333376438639,
-    "flat": 0.01842192875374542,
-    "up": 0.43375518563251586
+    "down": 0.6140781930255614,
+    "flat": 0.03850848962379314,
+    "up": 0.4851126398151552
   },
   "class_mean_returns": {
     "0": -0.018199279822257396,
@@ -1344,26 +1352,26 @@
   },
   "probability_threshold_scores": {
     "0.4": {
-      "mean_ticker_return": -0.11288904871140937,
-      "active_days": 22175
+      "mean_ticker_return": -0.11747934892160178,
+      "active_days": 23840
     },
     "0.45": {
-      "mean_ticker_return": 0.019272485018170256,
-      "active_days": 9960
+      "mean_ticker_return": -0.028681729950829852,
+      "active_days": 13320
     },
     "0.5": {
-      "mean_ticker_return": 0.010859670389965012,
-      "active_days": 5545
+      "mean_ticker_return": -0.013905652856954942,
+      "active_days": 8001
     },
     "0.55": {
-      "mean_ticker_return": 0.06912028086275969,
-      "active_days": 2579
+      "mean_ticker_return": 0.0006575689807568444,
+      "active_days": 4263
     },
     "0.6": {
-      "mean_ticker_return": 0.04009120479089922,
-      "active_days": 1087
+      "mean_ticker_return": -0.010825612236775067,
+      "active_days": 1865
     }
   },
   "recommended_probability_threshold": 0.55,
-  "best_iteration": 70
+  "best_iteration": 108
 }

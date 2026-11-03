@@ -1,0 +1,1692 @@
+{
+  "created_at": "2026-11-03T19:08:26",
+  "min_abs_return": 0.003,
+  "max_abs_return": 0.25,
+  "feature_columns": [
+    "ticker",
+    "return_1",
+    "return_3",
+    "return_5",
+    "return_10",
+    "return_20",
+    "mean_return_5",
+    "mean_return_10",
+    "volatility_5",
+    "volatility_10",
+    "volatility_20",
+    "sma_gap_5",
+    "sma_gap_10",
+    "sma_gap_20",
+    "rsi_14",
+    "atr_14",
+    "range_pct",
+    "overnight_gap",
+    "intraday_return",
+    "close_position",
+    "volume_change",
+    "volume_z_20",
+    "log_turnover",
+    "turnover_change",
+    "turnover_z_20",
+    "zero_volume_ratio_20",
+    "market_return_1",
+    "market_return_5",
+    "market_return_20",
+    "market_mean_return_5",
+    "market_volatility_20",
+    "market_sma_gap_20",
+    "relative_return_5",
+    "relative_volatility_20",
+    "weekday_sin",
+    "weekday_cos"
+  ],
+  "tickers": [
+    "ABIO",
+    "ABRD",
+    "AFKS",
+    "AFLT",
+    "AKRN",
+    "ALRS",
+    "AMEZ",
+    "APRI",
+    "APTK",
+    "AQUA",
+    "ARSA",
+    "ASSB",
+    "ASTR",
+    "AVAN",
+    "BANE",
+    "BANEP",
+    "BAZA",
+    "BELU",
+    "BISVP",
+    "BLNG",
+    "BRZL",
+    "BSPB",
+    "BSPBP",
+    "CARM",
+    "CBOM",
+    "CHGZ",
+    "CHKZ",
+    "CHMF",
+    "CHMK",
+    "CNRU",
+    "CNTL",
+    "CNTLP",
+    "DATA",
+    "DELI",
+    "DIAS",
+    "DIOD",
+    "DOMRF",
+    "DVEC",
+    "DZRD",
+    "DZRDP",
+    "EELT",
+    "ELFV",
+    "ELMT",
+    "ENPG",
+    "ETLN",
+    "EUTR",
+    "FEES",
+    "FESH",
+    "FIXR",
+    "FLOT",
+    "GAZA",
+    "GAZAP",
+    "GAZP",
+    "GCHE",
+    "GECO",
+    "GEMA",
+    "GEMC",
+    "GLRX",
+    "GMKN",
+    "GTRK",
+    "HEAD",
+    "HIMCP",
+    "HNFG",
+    "HYDR",
+    "IGST",
+    "IGSTP",
+    "IRAO",
+    "IRKT",
+    "IVAT",
+    "JNOS",
+    "JNOSP",
+    "KAZT",
+    "KAZTP",
+    "KBSB",
+    "KCHE",
+    "KCHEP",
+    "KFBA",
+    "KGKC",
+    "KGKCP",
+    "KLSB",
+    "KLVZ",
+    "KMAZ",
+    "KMEZ",
+    "KOGK",
+    "KRKN",
+    "KRKNP",
+    "KRKOP",
+    "KROT",
+    "KROTP",
+    "KRSB",
+    "KRSBP",
+    "KUZB",
+    "KZOS",
+    "KZOSP",
+    "LEAS",
+    "LENT",
+    "LIFE",
+    "LKOH",
+    "LMBZ",
+    "LPSB",
+    "LSNG",
+    "LSNGP",
+    "LSRG",
+    "LVHK",
+    "MAGE",
+    "MAGEP",
+    "MAGN",
+    "MBNK",
+    "MDMG",
+    "MFGS",
+    "MFGSP",
+    "MGKL",
+    "MGNT",
+    "MGTS",
+    "MGTSP",
+    "MISB",
+    "MISBP",
+    "MOEX",
+    "MRKC",
+    "MRKK",
+    "MRKP",
+    "MRKS",
+    "MRKU",
+    "MRKV",
+    "MRKY",
+    "MRKZ",
+    "MRSB",
+    "MSNG",
+    "MSRS",
+    "MSTT",
+    "MTLR",
+    "MTLRP",
+    "MTSS",
+    "MVID",
+    "NAUK",
+    "NFAZ",
+    "NKHP",
+    "NKNC",
+    "NKNCP",
+    "NKSH",
+    "NLMK",
+    "NMTP",
+    "NNSB",
+    "NNSBP",
+    "NSVZ",
+    "NVTK",
+    "OGKB",
+    "OKEY",
+    "OMZZP",
+    "OZON",
+    "OZPH",
+    "PAZA",
+    "PHOR",
+    "PIKK",
+    "PLZL",
+    "PMSB",
+    "PMSBP",
+    "POSI",
+    "PRFN",
+    "PRMB",
+    "PRMD",
+    "RAGR",
+    "RASP",
+    "RBCM",
+    "RDRB",
+    "RENI",
+    "RGSS",
+    "RKKE",
+    "RNFT",
+    "ROLO",
+    "ROSN",
+    "ROST",
+    "RTGZ",
+    "RTKM",
+    "RTKMP",
+    "RTSB",
+    "RTSBP",
+    "RUAL",
+    "RUSI",
+    "RZSB",
+    "SAGO",
+    "SAGOP",
+    "SARE",
+    "SAREP",
+    "SBER",
+    "SBERP",
+    "SELG",
+    "SFIN",
+    "SGZH",
+    "SIBN",
+    "SLEN",
+    "SMLT",
+    "SNGS",
+    "SNGSP",
+    "SOFL",
+    "SPBE",
+    "STSB",
+    "STSBP",
+    "SVAV",
+    "SVCB",
+    "SVET",
+    "SVETP",
+    "T",
+    "TASB",
+    "TASBP",
+    "TATN",
+    "TATNP",
+    "TGKA",
+    "TGKB",
+    "TGKBP",
+    "TGKN",
+    "TNSE",
+    "TORS",
+    "TORSP",
+    "TRMK",
+    "TRNFP",
+    "TTLK",
+    "TUZA",
+    "UGLD",
+    "UKUZ",
+    "UNAC",
+    "UNKL",
+    "UPRO",
+    "URKZ",
+    "USBN",
+    "UTAR",
+    "UWGN",
+    "VEON-RX",
+    "VGSB",
+    "VGSBP",
+    "VJGZ",
+    "VJGZP",
+    "VKCO",
+    "VLHZ",
+    "VRSB",
+    "VRSBP",
+    "VSEH",
+    "VSMO",
+    "VSYD",
+    "VSYDP",
+    "VTBR",
+    "WTCM",
+    "WTCMP",
+    "WUSH",
+    "X5",
+    "YAKG",
+    "YDEX",
+    "YKEN",
+    "YKENP",
+    "YRSB",
+    "YRSBP",
+    "ZAYM",
+    "ZILL",
+    "ZVEZ"
+  ],
+  "dataset_rows": 197454,
+  "skipped": [
+    {
+      "ticker": "AIIQ",
+      "reason": "'strategy_return'"
+    },
+    {
+      "ticker": "AKAI",
+      "reason": "мало сигналов"
+    },
+    {
+      "ticker": "AKBC",
+      "reason": "мало сигналов"
+    },
+    {
+      "ticker": "AKCN",
+      "reason": "мало сигналов"
+    },
+    {
+      "ticker": "AKFB",
+      "reason": "мало сигналов"
+    },
+    {
+      "ticker": "AKFN",
+      "reason": "мало сигналов"
+    },
+    {
+      "ticker": "AKGD",
+      "reason": "мало сигналов"
+    },
+    {
+      "ticker": "AKGP",
+      "reason": "мало сигналов"
+    },
+    {
+      "ticker": "AKHT",
+      "reason": "мало сигналов"
+    },
+    {
+      "ticker": "AKIE",
+      "reason": "мало сигналов"
+    },
+    {
+      "ticker": "AKMB",
+      "reason": "мало сигналов"
+    },
+    {
+      "ticker": "AKMC",
+      "reason": "мало сигналов"
+    },
+    {
+      "ticker": "AKME",
+      "reason": "мало сигналов"
+    },
+    {
+      "ticker": "AKMM",
+      "reason": "мало сигналов"
+    },
+    {
+      "ticker": "AKMP",
+      "reason": "мало сигналов"
+    },
+    {
+      "ticker": "AKPP",
+      "reason": "мало сигналов"
+    },
+    {
+      "ticker": "AKQU",
+      "reason": "мало сигналов"
+    },
+    {
+      "ticker": "AKUP",
+      "reason": "мало сигналов"
+    },
+    {
+      "ticker": "AMFL",
+      "reason": "мало сигналов"
+    },
+    {
+      "ticker": "AMGB",
+      "reason": "мало сигналов"
+    },
+    {
+      "ticker": "AMGL",
+      "reason": "мало сигналов"
+    },
+    {
+      "ticker": "AMIX",
+      "reason": "мало сигналов"
+    },
+    {
+      "ticker": "AMNR",
+      "reason": "мало сигналов"
+    },
+    {
+      "ticker": "AMNY",
+      "reason": "мало сигналов"
+    },
+    {
+      "ticker": "AMRE",
+      "reason": "мало сигналов"
+    },
+    {
+      "ticker": "AMRH",
+      "reason": "мало сигналов"
+    },
+    {
+      "ticker": "AMVD",
+      "reason": "мало сигналов"
+    },
+    {
+      "ticker": "AMVY",
+      "reason": "мало сигналов"
+    },
+    {
+      "ticker": "BCSB",
+      "reason": "мало сигналов"
+    },
+    {
+      "ticker": "BCSD",
+      "reason": "мало сигналов"
+    },
+    {
+      "ticker": "BCSE",
+      "reason": "мало сигналов"
+    },
+    {
+      "ticker": "BCSG",
+      "reason": "мало сигналов"
+    },
+    {
+      "ticker": "BCSR",
+      "reason": "мало сигналов"
+    },
+    {
+      "ticker": "BCSW",
+      "reason": "мало сигналов"
+    },
+    {
+      "ticker": "BNDA",
+      "reason": "мало сигналов"
+    },
+    {
+      "ticker": "BNDB",
+      "reason": "мало сигналов"
+    },
+    {
+      "ticker": "BNDC",
+      "reason": "мало сигналов"
+    },
+    {
+      "ticker": "BOND",
+      "reason": "мало сигналов"
+    },
+    {
+      "ticker": "BTBR",
+      "reason": "мало сигналов"
+    },
+    {
+      "ticker": "CASH",
+      "reason": "мало сигналов"
+    },
+    {
+      "ticker": "CNYM",
+      "reason": "мало сигналов"
+    },
+    {
+      "ticker": "CORP",
+      "reason": "мало сигналов"
+    },
+    {
+      "ticker": "DIVD",
+      "reason": "мало сигналов"
+    },
+    {
+      "ticker": "EQMX",
+      "reason": "мало сигналов"
+    },
+    {
+      "ticker": "ESGE",
+      "reason": "мало сигналов"
+    },
+    {
+      "ticker": "ESGR",
+      "reason": "мало сигналов"
+    },
+    {
+      "ticker": "EVRZ",
+      "reason": "мало сигналов"
+    },
+    {
+      "ticker": "FINC",
+      "reason": "мало сигналов"
+    },
+    {
+      "ticker": "FLOW",
+      "reason": "мало сигналов"
+    },
+    {
+      "ticker": "FMBR",
+      "reason": "мало сигналов"
+    },
+    {
+      "ticker": "FMMM",
+      "reason": "мало сигналов"
+    },
+    {
+      "ticker": "FMSA",
+      "reason": "мало сигналов"
+    },
+    {
+      "ticker": "GAZC",
+      "reason": "'strategy_return'"
+    },
+    {
+      "ticker": "GAZS",
+      "reason": "'strategy_return'"
+    },
+    {
+      "ticker": "GAZT",
+      "reason": "'strategy_return'"
+    },
+    {
+      "ticker": "GOLD",
+      "reason": "мало сигналов"
+    },
+    {
+      "ticker": "GOOD",
+      "reason": "мало сигналов"
+    },
+    {
+      "ticker": "GROD",
+      "reason": "мало сигналов"
+    },
+    {
+      "ticker": "INCB",
+      "reason": "мало сигналов"
+    },
+    {
+      "ticker": "INFL",
+      "reason": "мало сигналов"
+    },
+    {
+      "ticker": "INGO",
+      "reason": "мало сигналов"
+    },
+    {
+      "ticker": "LQDT",
+      "reason": "мало сигналов"
+    },
+    {
+      "ticker": "MGNZ",
+      "reason": "мало сигналов"
+    },
+    {
+      "ticker": "MKBD",
+      "reason": "мало сигналов"
+    },
+    {
+      "ticker": "MONY",
+      "reason": "мало сигналов"
+    },
+    {
+      "ticker": "NFKL",
+      "reason": "мало сигналов"
+    },
+    {
+      "ticker": "OBLG",
+      "reason": "мало сигналов"
+    },
+    {
+      "ticker": "OFZS",
+      "reason": "мало сигналов"
+    },
+    {
+      "ticker": "OLIQ",
+      "reason": "мало сигналов"
+    },
+    {
+      "ticker": "PRIE",
+      "reason": "мало сигналов"
+    },
+    {
+      "ticker": "PSGM",
+      "reason": "мало сигналов"
+    },
+    {
+      "ticker": "PSMM",
+      "reason": "мало сигналов"
+    },
+    {
+      "ticker": "PSRB",
+      "reason": "мало сигналов"
+    },
+    {
+      "ticker": "PSRE",
+      "reason": "мало сигналов"
+    },
+    {
+      "ticker": "ROBL",
+      "reason": "'strategy_return'"
+    },
+    {
+      "ticker": "RSHU",
+      "reason": "мало сигналов"
+    },
+    {
+      "ticker": "RU0005418747",
+      "reason": "мало сигналов"
+    },
+    {
+      "ticker": "RU0006922010",
+      "reason": "мало сигналов"
+    },
+    {
+      "ticker": "RU0006922044",
+      "reason": "мало сигналов"
+    },
+    {
+      "ticker": "RU000A0HGNG6",
+      "reason": "мало сигналов"
+    },
+    {
+      "ticker": "RU000A0HGNH4",
+      "reason": "мало сигналов"
+    },
+    {
+      "ticker": "RU000A0JP773",
+      "reason": "мало сигналов"
+    },
+    {
+      "ticker": "RU000A0JP799",
+      "reason": "мало сигналов"
+    },
+    {
+      "ticker": "RU000A0JPMD2",
+      "reason": "мало сигналов"
+    },
+    {
+      "ticker": "RU000A0JPZL7",
+      "reason": "нет данных"
+    },
+    {
+      "ticker": "RU000A0JPZP8",
+      "reason": "нет данных"
+    },
+    {
+      "ticker": "RU000A0JR282",
+      "reason": "мало сигналов"
+    },
+    {
+      "ticker": "RU000A0JR290",
+      "reason": "мало сигналов"
+    },
+    {
+      "ticker": "RU000A0JR2A5",
+      "reason": "нет данных"
+    },
+    {
+      "ticker": "RU000A0JR2C1",
+      "reason": "мало сигналов"
+    },
+    {
+      "ticker": "RU000A0JRHC0",
+      "reason": "мало сигналов"
+    },
+    {
+      "ticker": "RU000A0JRUQ3",
+      "reason": "'strategy_return'"
+    },
+    {
+      "ticker": "RU000A0JUR61",
+      "reason": "мало сигналов"
+    },
+    {
+      "ticker": "RU000A0JUYB1",
+      "reason": "нет данных"
+    },
+    {
+      "ticker": "RU000A0JVJ29",
+      "reason": "мало сигналов"
+    },
+    {
+      "ticker": "RU000A0JWCE7",
+      "reason": "мало сигналов"
+    },
+    {
+      "ticker": "RU000A0JXP78",
+      "reason": "мало сигналов"
+    },
+    {
+      "ticker": "RU000A0JXWF0",
+      "reason": "мало сигналов"
+    },
+    {
+      "ticker": "RU000A0ZYC64",
+      "reason": "'strategy_return'"
+    },
+    {
+      "ticker": "RU000A0ZZ5R2",
+      "reason": "мало сигналов"
+    },
+    {
+      "ticker": "RU000A0ZZCD8",
+      "reason": "мало сигналов"
+    },
+    {
+      "ticker": "RU000A0ZZMD7",
+      "reason": "мало сигналов"
+    },
+    {
+      "ticker": "RU000A0ZZME5",
+      "reason": "'strategy_return'"
+    },
+    {
+      "ticker": "RU000A0ZZML0",
+      "reason": "мало сигналов"
+    },
+    {
+      "ticker": "RU000A0ZZMN6",
+      "reason": "мало сигналов"
+    },
+    {
+      "ticker": "RU000A0ZZVH9",
+      "reason": "'strategy_return'"
+    },
+    {
+      "ticker": "RU000A1000W4",
+      "reason": "мало сигналов"
+    },
+    {
+      "ticker": "RU000A1000Y0",
+      "reason": "'strategy_return'"
+    },
+    {
+      "ticker": "RU000A100EQ2",
+      "reason": "мало сигналов"
+    },
+    {
+      "ticker": "RU000A100WZ5",
+      "reason": "мало сигналов"
+    },
+    {
+      "ticker": "RU000A101NK4",
+      "reason": "мало сигналов"
+    },
+    {
+      "ticker": "RU000A101UK9",
+      "reason": "'strategy_return'"
+    },
+    {
+      "ticker": "RU000A101UY0",
+      "reason": "мало сигналов"
+    },
+    {
+      "ticker": "RU000A1022Z1",
+      "reason": "мало сигналов"
+    },
+    {
+      "ticker": "RU000A1027E5",
+      "reason": "мало сигналов"
+    },
+    {
+      "ticker": "RU000A102AH5",
+      "reason": "'strategy_return'"
+    },
+    {
+      "ticker": "RU000A102N77",
+      "reason": "мало сигналов"
+    },
+    {
+      "ticker": "RU000A102PE0",
+      "reason": "мало сигналов"
+    },
+    {
+      "ticker": "RU000A102PF7",
+      "reason": "мало сигналов"
+    },
+    {
+      "ticker": "RU000A102PQ4",
+      "reason": "мало сигналов"
+    },
+    {
+      "ticker": "RU000A1034U7",
+      "reason": "мало сигналов"
+    },
+    {
+      "ticker": "RU000A103B62",
+      "reason": "мало сигналов"
+    },
+    {
+      "ticker": "RU000A103HD7",
+      "reason": "нет данных"
+    },
+    {
+      "ticker": "RU000A104172",
+      "reason": "мало сигналов"
+    },
+    {
+      "ticker": "RU000A104KU3",
+      "reason": "мало сигналов"
+    },
+    {
+      "ticker": "RU000A104M43",
+      "reason": "мало сигналов"
+    },
+    {
+      "ticker": "RU000A104YX8",
+      "reason": "мало сигналов"
+    },
+    {
+      "ticker": "RU000A105153",
+      "reason": "'strategy_return'"
+    },
+    {
+      "ticker": "RU000A105328",
+      "reason": "мало сигналов"
+    },
+    {
+      "ticker": "RU000A105GY0",
+      "reason": "'strategy_return'"
+    },
+    {
+      "ticker": "RU000A105R70",
+      "reason": "'strategy_return'"
+    },
+    {
+      "ticker": "RU000A105RJ8",
+      "reason": "мало сигналов"
+    },
+    {
+      "ticker": "RU000A105TU1",
+      "reason": "мало сигналов"
+    },
+    {
+      "ticker": "RU000A1068X9",
+      "reason": "мало сигналов"
+    },
+    {
+      "ticker": "RU000A106CX9",
+      "reason": "'strategy_return'"
+    },
+    {
+      "ticker": "RU000A106G80",
+      "reason": "мало сигналов"
+    },
+    {
+      "ticker": "RU000A106LB6",
+      "reason": "'strategy_return'"
+    },
+    {
+      "ticker": "RU000A106LC4",
+      "reason": "мало сигналов"
+    },
+    {
+      "ticker": "RU000A106MG3",
+      "reason": "'strategy_return'"
+    },
+    {
+      "ticker": "RU000A106N57",
+      "reason": "'strategy_return'"
+    },
+    {
+      "ticker": "RU000A106SA3",
+      "reason": "'strategy_return'"
+    },
+    {
+      "ticker": "RU000A106XE5",
+      "reason": "'strategy_return'"
+    },
+    {
+      "ticker": "RU000A1075T2",
+      "reason": "нет данных"
+    },
+    {
+      "ticker": "RU000A107860",
+      "reason": "'strategy_return'"
+    },
+    {
+      "ticker": "RU000A1079J5",
+      "reason": "'strategy_return'"
+    },
+    {
+      "ticker": "RU000A107J37",
+      "reason": "нет данных"
+    },
+    {
+      "ticker": "RU000A107RE5",
+      "reason": "'strategy_return'"
+    },
+    {
+      "ticker": "RU000A107U08",
+      "reason": "мало сигналов"
+    },
+    {
+      "ticker": "RU000A108751",
+      "reason": "'strategy_return'"
+    },
+    {
+      "ticker": "RU000A108KP4",
+      "reason": "'strategy_return'"
+    },
+    {
+      "ticker": "RU000A108TT7",
+      "reason": "мало сигналов"
+    },
+    {
+      "ticker": "RU000A108UH0",
+      "reason": "мало сигналов"
+    },
+    {
+      "ticker": "RU000A108VR7",
+      "reason": "мало сигналов"
+    },
+    {
+      "ticker": "RU000A108ZB2",
+      "reason": "мало сигналов"
+    },
+    {
+      "ticker": "RU000A1092L4",
+      "reason": "мало сигналов"
+    },
+    {
+      "ticker": "RU000A1095D4",
+      "reason": "мало сигналов"
+    },
+    {
+      "ticker": "RU000A1099U0",
+      "reason": "мало сигналов"
+    },
+    {
+      "ticker": "RU000A109G79",
+      "reason": "мало сигналов"
+    },
+    {
+      "ticker": "RU000A109GQ8",
+      "reason": "мало сигналов"
+    },
+    {
+      "ticker": "RU000A109NL5",
+      "reason": "'strategy_return'"
+    },
+    {
+      "ticker": "RU000A109QR5",
+      "reason": "мало сигналов"
+    },
+    {
+      "ticker": "RU000A109R27",
+      "reason": "мало сигналов"
+    },
+    {
+      "ticker": "RU000A10A489",
+      "reason": "мало сигналов"
+    },
+    {
+      "ticker": "RU000A10AN72",
+      "reason": "мало сигналов"
+    },
+    {
+      "ticker": "RU000A10AQT4",
+      "reason": "мало сигналов"
+    },
+    {
+      "ticker": "RU000A10ATA8",
+      "reason": "'strategy_return'"
+    },
+    {
+      "ticker": "RU000A10BBS6",
+      "reason": "мало сигналов"
+    },
+    {
+      "ticker": "RU000A10BM31",
+      "reason": "мало сигналов"
+    },
+    {
+      "ticker": "RU000A10BQP0",
+      "reason": "мало сигналов"
+    },
+    {
+      "ticker": "RU000A10BQQ8",
+      "reason": "'strategy_return'"
+    },
+    {
+      "ticker": "RU000A10BT26",
+      "reason": "нет данных"
+    },
+    {
+      "ticker": "RU000A10BT42",
+      "reason": "мало сигналов"
+    },
+    {
+      "ticker": "RU000A10CFM8",
+      "reason": "мало сигналов"
+    },
+    {
+      "ticker": "RU000A10CKQ9",
+      "reason": "мало сигналов"
+    },
+    {
+      "ticker": "RU000A10CLY1",
+      "reason": "'strategy_return'"
+    },
+    {
+      "ticker": "RU000A10D7W9",
+      "reason": "'strategy_return'"
+    },
+    {
+      "ticker": "RU000A10D814",
+      "reason": "мало сигналов"
+    },
+    {
+      "ticker": "RU000A10E3R7",
+      "reason": "мало сигналов"
+    },
+    {
+      "ticker": "RU000A10ECF5",
+      "reason": "'strategy_return'"
+    },
+    {
+      "ticker": "RU000A10ECJ7",
+      "reason": "нет данных"
+    },
+    {
+      "ticker": "RU000A10EVE8",
+      "reason": "мало сигналов"
+    },
+    {
+      "ticker": "RU000A10F439",
+      "reason": "нет данных"
+    },
+    {
+      "ticker": "RU000A10FDU9",
+      "reason": "'strategy_return'"
+    },
+    {
+      "ticker": "RU000A10FQ17",
+      "reason": "мало сигналов"
+    },
+    {
+      "ticker": "RUFO",
+      "reason": "мало сигналов"
+    },
+    {
+      "ticker": "SAFE",
+      "reason": "мало сигналов"
+    },
+    {
+      "ticker": "SBBC",
+      "reason": "мало сигналов"
+    },
+    {
+      "ticker": "SBBY",
+      "reason": "мало сигналов"
+    },
+    {
+      "ticker": "SBCB",
+      "reason": "мало сигналов"
+    },
+    {
+      "ticker": "SBCN",
+      "reason": "мало сигналов"
+    },
+    {
+      "ticker": "SBDS",
+      "reason": "мало сигналов"
+    },
+    {
+      "ticker": "SBFR",
+      "reason": "мало сигналов"
+    },
+    {
+      "ticker": "SBGB",
+      "reason": "мало сигналов"
+    },
+    {
+      "ticker": "SBGD",
+      "reason": "мало сигналов"
+    },
+    {
+      "ticker": "SBHI",
+      "reason": "мало сигналов"
+    },
+    {
+      "ticker": "SBLB",
+      "reason": "мало сигналов"
+    },
+    {
+      "ticker": "SBMM",
+      "reason": "мало сигналов"
+    },
+    {
+      "ticker": "SBMX",
+      "reason": "мало сигналов"
+    },
+    {
+      "ticker": "SBPS",
+      "reason": "мало сигналов"
+    },
+    {
+      "ticker": "SBRB",
+      "reason": "мало сигналов"
+    },
+    {
+      "ticker": "SBRI",
+      "reason": "мало сигналов"
+    },
+    {
+      "ticker": "SBRS",
+      "reason": "мало сигналов"
+    },
+    {
+      "ticker": "SBSC",
+      "reason": "мало сигналов"
+    },
+    {
+      "ticker": "SCFT",
+      "reason": "мало сигналов"
+    },
+    {
+      "ticker": "SCLI",
+      "reason": "мало сигналов"
+    },
+    {
+      "ticker": "SECR",
+      "reason": "'strategy_return'"
+    },
+    {
+      "ticker": "SILA",
+      "reason": "мало сигналов"
+    },
+    {
+      "ticker": "SIPO",
+      "reason": "мало сигналов"
+    },
+    {
+      "ticker": "SMCF",
+      "reason": "мало сигналов"
+    },
+    {
+      "ticker": "SPRN",
+      "reason": "мало сигналов"
+    },
+    {
+      "ticker": "STME",
+      "reason": "мало сигналов"
+    },
+    {
+      "ticker": "SUGB",
+      "reason": "мало сигналов"
+    },
+    {
+      "ticker": "TBEU",
+      "reason": "мало сигналов"
+    },
+    {
+      "ticker": "TBRU",
+      "reason": "мало сигналов"
+    },
+    {
+      "ticker": "TDIV",
+      "reason": "мало сигналов"
+    },
+    {
+      "ticker": "TEUR",
+      "reason": "мало сигналов"
+    },
+    {
+      "ticker": "TGLD",
+      "reason": "мало сигналов"
+    },
+    {
+      "ticker": "TITR",
+      "reason": "мало сигналов"
+    },
+    {
+      "ticker": "TLCB",
+      "reason": "мало сигналов"
+    },
+    {
+      "ticker": "TMON",
+      "reason": "мало сигналов"
+    },
+    {
+      "ticker": "TMOS",
+      "reason": "мало сигналов"
+    },
+    {
+      "ticker": "TOFZ",
+      "reason": "мало сигналов"
+    },
+    {
+      "ticker": "TOPS",
+      "reason": "мало сигналов"
+    },
+    {
+      "ticker": "TPAY",
+      "reason": "мало сигналов"
+    },
+    {
+      "ticker": "TRND",
+      "reason": "мало сигналов"
+    },
+    {
+      "ticker": "TRUR",
+      "reason": "мало сигналов"
+    },
+    {
+      "ticker": "TSAV",
+      "reason": "мало сигналов"
+    },
+    {
+      "ticker": "TUSD",
+      "reason": "мало сигналов"
+    },
+    {
+      "ticker": "VDOR",
+      "reason": "мало сигналов"
+    },
+    {
+      "ticker": "WFLO",
+      "reason": "'strategy_return'"
+    },
+    {
+      "ticker": "WFUT",
+      "reason": "'strategy_return'"
+    },
+    {
+      "ticker": "WILD",
+      "reason": "мало сигналов"
+    },
+    {
+      "ticker": "WOFZ",
+      "reason": "'strategy_return'"
+    },
+    {
+      "ticker": "WUSD",
+      "reason": "'strategy_return'"
+    },
+    {
+      "ticker": "XACCSK",
+      "reason": "мало сигналов"
+    },
+    {
+      "ticker": "XAVIUM",
+      "reason": "мало сигналов"
+    },
+    {
+      "ticker": "XCREDI",
+      "reason": "'strategy_return'"
+    },
+    {
+      "ticker": "XEQTRU",
+      "reason": "'strategy_return'"
+    },
+    {
+      "ticker": "XFMAGR",
+      "reason": "'strategy_return'"
+    },
+    {
+      "ticker": "XFMAGY",
+      "reason": "нет данных"
+    },
+    {
+      "ticker": "XFMAIN",
+      "reason": "'strategy_return'"
+    },
+    {
+      "ticker": "XFMOMB",
+      "reason": "нет данных"
+    },
+    {
+      "ticker": "XHEDGE",
+      "reason": "мало сигналов"
+    },
+    {
+      "ticker": "XHOUSE",
+      "reason": "мало сигналов"
+    },
+    {
+      "ticker": "XIPKSV",
+      "reason": "мало сигналов"
+    },
+    {
+      "ticker": "XKLUCH",
+      "reason": "мало сигналов"
+    },
+    {
+      "ticker": "XLAMIX",
+      "reason": "'strategy_return'"
+    },
+    {
+      "ticker": "XNIRUM",
+      "reason": "мало сигналов"
+    },
+    {
+      "ticker": "XQUANT",
+      "reason": "'strategy_return'"
+    },
+    {
+      "ticker": "XSBORA",
+      "reason": "мало сигналов"
+    },
+    {
+      "ticker": "XSECUR",
+      "reason": "мало сигналов"
+    },
+    {
+      "ticker": "XSKLAD",
+      "reason": "мало сигналов"
+    },
+    {
+      "ticker": "XTRIUMF",
+      "reason": "мало сигналов"
+    },
+    {
+      "ticker": "XWIMRD",
+      "reason": "нет данных"
+    },
+    {
+      "ticker": "XXRONE",
+      "reason": "'strategy_return'"
+    },
+    {
+      "ticker": "XXXXXX",
+      "reason": "мало сигналов"
+    },
+    {
+      "ticker": "YUAN",
+      "reason": "мало сигналов"
+    }
+  ],
+  "model_type": "lightgbm_binary_open_close_signal",
+  "model_path": "models/stock_signal_lgbm.txt",
+  "ticker_mapping": {
+    "ABIO": 0,
+    "ABRD": 1,
+    "AFKS": 2,
+    "AFLT": 3,
+    "AKRN": 4,
+    "ALRS": 5,
+    "AMEZ": 6,
+    "APRI": 7,
+    "APTK": 8,
+    "AQUA": 9,
+    "ARSA": 10,
+    "ASSB": 11,
+    "ASTR": 12,
+    "AVAN": 13,
+    "BANE": 14,
+    "BANEP": 15,
+    "BELU": 16,
+    "BISVP": 17,
+    "BLNG": 18,
+    "BRZL": 19,
+    "BSPB": 20,
+    "BSPBP": 21,
+    "CARM": 22,
+    "CBOM": 23,
+    "CHGZ": 24,
+    "CHKZ": 25,
+    "CHMF": 26,
+    "CHMK": 27,
+    "CNRU": 28,
+    "CNTL": 29,
+    "CNTLP": 30,
+    "DATA": 31,
+    "DELI": 32,
+    "DIAS": 33,
+    "DIOD": 34,
+    "DVEC": 35,
+    "DZRD": 36,
+    "DZRDP": 37,
+    "EELT": 38,
+    "ELFV": 39,
+    "ELMT": 40,
+    "ENPG": 41,
+    "ETLN": 42,
+    "EUTR": 43,
+    "FEES": 44,
+    "FESH": 45,
+    "FLOT": 46,
+    "GAZA": 47,
+    "GAZAP": 48,
+    "GAZP": 49,
+    "GCHE": 50,
+    "GECO": 51,
+    "GEMA": 52,
+    "GEMC": 53,
+    "GMKN": 54,
+    "GTRK": 55,
+    "HEAD": 56,
+    "HIMCP": 57,
+    "HNFG": 58,
+    "HYDR": 59,
+    "IGST": 60,
+    "IGSTP": 61,
+    "IRAO": 62,
+    "IRKT": 63,
+    "IVAT": 64,
+    "JNOS": 65,
+    "JNOSP": 66,
+    "KAZT": 67,
+    "KAZTP": 68,
+    "KBSB": 69,
+    "KCHE": 70,
+    "KCHEP": 71,
+    "KGKC": 72,
+    "KGKCP": 73,
+    "KLSB": 74,
+    "KLVZ": 75,
+    "KMAZ": 76,
+    "KMEZ": 77,
+    "KOGK": 78,
+    "KRKN": 79,
+    "KRKNP": 80,
+    "KRKOP": 81,
+    "KROT": 82,
+    "KROTP": 83,
+    "KRSB": 84,
+    "KRSBP": 85,
+    "KUZB": 86,
+    "KZOS": 87,
+    "KZOSP": 88,
+    "LEAS": 89,
+    "LENT": 90,
+    "LIFE": 91,
+    "LKOH": 92,
+    "LMBZ": 93,
+    "LPSB": 94,
+    "LSNG": 95,
+    "LSNGP": 96,
+    "LSRG": 97,
+    "LVHK": 98,
+    "MAGE": 99,
+    "MAGEP": 100,
+    "MAGN": 101,
+    "MBNK": 102,
+    "MDMG": 103,
+    "MFGS": 104,
+    "MFGSP": 105,
+    "MGKL": 106,
+    "MGNT": 107,
+    "MGTS": 108,
+    "MGTSP": 109,
+    "MISB": 110,
+    "MISBP": 111,
+    "MOEX": 112,
+    "MRKC": 113,
+    "MRKK": 114,
+    "MRKP": 115,
+    "MRKS": 116,
+    "MRKU": 117,
+    "MRKV": 118,
+    "MRKY": 119,
+    "MRKZ": 120,
+    "MRSB": 121,
+    "MSNG": 122,
+    "MSRS": 123,
+    "MSTT": 124,
+    "MTLR": 125,
+    "MTLRP": 126,
+    "MTSS": 127,
+    "MVID": 128,
+    "NAUK": 129,
+    "NFAZ": 130,
+    "NKHP": 131,
+    "NKNC": 132,
+    "NKNCP": 133,
+    "NKSH": 134,
+    "NLMK": 135,
+    "NMTP": 136,
+    "NNSB": 137,
+    "NNSBP": 138,
+    "NSVZ": 139,
+    "NVTK": 140,
+    "OGKB": 141,
+    "OKEY": 142,
+    "OMZZP": 143,
+    "OZON": 144,
+    "OZPH": 145,
+    "PAZA": 146,
+    "PHOR": 147,
+    "PIKK": 148,
+    "PLZL": 149,
+    "PMSB": 150,
+    "PMSBP": 151,
+    "POSI": 152,
+    "PRFN": 153,
+    "PRMB": 154,
+    "PRMD": 155,
+    "RAGR": 156,
+    "RASP": 157,
+    "RBCM": 158,
+    "RDRB": 159,
+    "RENI": 160,
+    "RGSS": 161,
+    "RKKE": 162,
+    "RNFT": 163,
+    "ROLO": 164,
+    "ROSN": 165,
+    "ROST": 166,
+    "RTGZ": 167,
+    "RTKM": 168,
+    "RTKMP": 169,
+    "RTSB": 170,
+    "RTSBP": 171,
+    "RUAL": 172,
+    "RUSI": 173,
+    "RZSB": 174,
+    "SAGO": 175,
+    "SAGOP": 176,
+    "SARE": 177,
+    "SAREP": 178,
+    "SBER": 179,
+    "SBERP": 180,
+    "SELG": 181,
+    "SFIN": 182,
+    "SGZH": 183,
+    "SIBN": 184,
+    "SLEN": 185,
+    "SMLT": 186,
+    "SNGS": 187,
+    "SNGSP": 188,
+    "SOFL": 189,
+    "SPBE": 190,
+    "STSB": 191,
+    "STSBP": 192,
+    "SVAV": 193,
+    "SVCB": 194,
+    "SVET": 195,
+    "SVETP": 196,
+    "T": 197,
+    "TASB": 198,
+    "TASBP": 199,
+    "TATN": 200,
+    "TATNP": 201,
+    "TGKA": 202,
+    "TGKB": 203,
+    "TGKBP": 204,
+    "TGKN": 205,
+    "TNSE": 206,
+    "TORS": 207,
+    "TORSP": 208,
+    "TRMK": 209,
+    "TRNFP": 210,
+    "TTLK": 211,
+    "TUZA": 212,
+    "UGLD": 213,
+    "UKUZ": 214,
+    "UNAC": 215,
+    "UNKL": 216,
+    "UPRO": 217,
+    "URKZ": 218,
+    "USBN": 219,
+    "UTAR": 220,
+    "UWGN": 221,
+    "VEON-RX": 222,
+    "VGSB": 223,
+    "VGSBP": 224,
+    "VJGZ": 225,
+    "VJGZP": 226,
+    "VKCO": 227,
+    "VLHZ": 228,
+    "VRSB": 229,
+    "VRSBP": 230,
+    "VSEH": 231,
+    "VSMO": 232,
+    "VSYD": 233,
+    "VSYDP": 234,
+    "VTBR": 235,
+    "WTCM": 236,
+    "WTCMP": 237,
+    "WUSH": 238,
+    "X5": 239,
+    "YAKG": 240,
+    "YDEX": 241,
+    "YKEN": 242,
+    "YKENP": 243,
+    "YRSB": 244,
+    "YRSBP": 245,
+    "ZAYM": 246,
+    "ZILL": 247,
+    "ZVEZ": 248
+  },
+  "lightgbm_features": [
+    "ticker_code",
+    "return_1",
+    "return_3",
+    "return_5",
+    "return_10",
+    "return_20",
+    "mean_return_5",
+    "mean_return_10",
+    "volatility_5",
+    "volatility_10",
+    "volatility_20",
+    "sma_gap_5",
+    "sma_gap_10",
+    "sma_gap_20",
+    "rsi_14",
+    "atr_14",
+    "range_pct",
+    "overnight_gap",
+    "intraday_return",
+    "close_position",
+    "volume_change",
+    "volume_z_20",
+    "log_turnover",
+    "turnover_change",
+    "turnover_z_20",
+    "zero_volume_ratio_20",
+    "market_return_1",
+    "market_return_5",
+    "market_return_20",
+    "market_mean_return_5",
+    "market_volatility_20",
+    "market_sma_gap_20",
+    "relative_return_5",
+    "relative_volatility_20",
+    "weekday_sin",
+    "weekday_cos"
+  ],
+  "calibration_coefficient": -0.09770163510649857,
+  "calibration_intercept": -0.1788014616242918,
+  "up_confidence_threshold": null,
+  "down_confidence_threshold": null,
+  "direction_threshold_scores": {
+    "up": {
+      "0.55": {
+        "precision": 0.0,
+        "coverage": 0.0,
+        "signals": 0
+      },
+      "0.6": {
+        "precision": 0.0,
+        "coverage": 0.0,
+        "signals": 0
+      },
+      "0.65": {
+        "precision": 0.0,
+        "coverage": 0.0,
+        "signals": 0
+      },
+      "0.7": {
+        "precision": 0.0,
+        "coverage": 0.0,
+        "signals": 0
+      },
+      "0.75": {
+        "precision": 0.0,
+        "coverage": 0.0,
+        "signals": 0
+      },
+      "0.8": {
+        "precision": 0.0,
+        "coverage": 0.0,
+        "signals": 0
+      }
+    },
+    "down": {
+      "0.55": {
+        "precision": 0.0,
+        "coverage": 0.0,
+        "signals": 0
+      },
+      "0.6": {
+        "precision": 0.0,
+        "coverage": 0.0,
+        "signals": 0
+      },
+      "0.65": {
+        "precision": 0.0,
+        "coverage": 0.0,
+        "signals": 0
+      },
+      "0.7": {
+        "precision": 0.0,
+        "coverage": 0.0,
+        "signals": 0
+      },
+      "0.75": {
+        "precision": 0.0,
+        "coverage": 0.0,
+        "signals": 0
+      },
+      "0.8": {
+        "precision": 0.0,
+        "coverage": 0.0,
+        "signals": 0
+      }
+    }
+  },
+  "best_iteration": 9
+}

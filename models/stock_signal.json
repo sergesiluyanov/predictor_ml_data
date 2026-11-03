@@ -1,7 +1,5 @@
 {
-  "created_at": "2026-11-03T17:52:25",
-  "model_type": "catboost_binary_open_close_signal",
-  "model_path": "models/stock_signal.cbm",
+  "created_at": "2026-11-03T19:08:26",
   "min_abs_return": 0.003,
   "max_abs_return": 0.25,
   "feature_columns": [
@@ -22,20 +20,25 @@
     "rsi_14",
     "atr_14",
     "range_pct",
+    "overnight_gap",
+    "intraday_return",
+    "close_position",
     "volume_change",
     "volume_z_20",
     "log_turnover",
+    "turnover_change",
+    "turnover_z_20",
     "zero_volume_ratio_20",
     "market_return_1",
     "market_return_5",
     "market_return_20",
+    "market_mean_return_5",
     "market_volatility_20",
+    "market_sma_gap_20",
     "relative_return_5",
+    "relative_volatility_20",
     "weekday_sin",
     "weekday_cos"
-  ],
-  "categorical_features": [
-    "ticker"
   ],
   "tickers": [
     "ABIO",
@@ -293,10 +296,7 @@
     "ZILL",
     "ZVEZ"
   ],
-  "first_target_date": "2022-10-25",
-  "last_target_date": "2026-11-02",
   "dataset_rows": 197454,
-  "up_share": 0.4300140792285798,
   "skipped": [
     {
       "ticker": "AIIQ",
@@ -1327,12 +1327,14 @@
       "reason": "мало сигналов"
     }
   ],
+  "model_type": "catboost_binary_open_close_signal",
+  "model_path": "models/stock_signal.cbm",
   "train_rows": 123848,
   "early_stop_rows": 21004,
   "calibration_rows": 20177,
   "threshold_validation_rows": 32425,
-  "calibration_coefficient": 0.08901849748687482,
-  "calibration_intercept": -0.13608141797103146,
+  "calibration_coefficient": 0.13847172824839618,
+  "calibration_intercept": -0.12517683157029996,
   "up_confidence_threshold": null,
   "down_confidence_threshold": 0.55,
   "direction_threshold_scores": {
@@ -1370,9 +1372,9 @@
     },
     "down": {
       "0.55": {
-        "precision": 0.6712846347607053,
-        "coverage": 0.02448727833461835,
-        "signals": 794
+        "precision": 0.6437915505039674,
+        "coverage": 0.14380878951426368,
+        "signals": 4663
       },
       "0.6": {
         "precision": 0.0,
@@ -1401,7 +1403,7 @@
       }
     }
   },
-  "validation_precision": 0.6712846347607053,
-  "validation_coverage": 0.02448727833461835,
-  "best_iteration": 29
+  "validation_precision": 0.6437915505039674,
+  "validation_coverage": 0.14380878951426368,
+  "best_iteration": 81
 }
