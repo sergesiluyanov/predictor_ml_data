@@ -232,12 +232,31 @@ Cross-sectional long ranker проверяется и обучается отд�
   --tickers all \
   --max-tickers 0 \
   --refresh
+
+# После закрытия рынка: оценить все созревшие прогнозы
+.venv/bin/python evaluate_live_predictions.py --refresh
 ```
 
 Команда бота `/ideas` читает `models/latest_long_ideas.json`. Ranker выбирает
 только ликвидные бумаги, работает при положительном 20-дневном тренде IMOEX и
 волатильности ниже 2%; иначе возвращает режим cash. Исторический H5 gate пройден,
 но сигналы всё ещё требуют неизменяемой live-валидации.
+
+Каждый первый запуск генератора для новой даты создаёт immutable-файл
+`data/live_predictions/YYYY-MM-DD.json`. В нём фиксируются кандидаты, издержки
+и SHA-256 модели с метаданными; повторный запуск не может заменить этот файл.
+После пятой будущей сессии `evaluate_live_predictions.py` записывает отдельный
+неизменяемый результат в `data/live_results/` и обновляет сводку
+`reports/live_validation_summary.json`.
+
+Live gate требует минимум 30 независимых дат, 200 сигналов, положительную
+нижнюю границу bootstrap 95% CI средней доходности даты и drawdown не хуже
+−20%. До выполнения всех условий менять H5/top 3% policy нельзя.
+
+Workflow `.github/workflows/live-validation.yml` запускает этот цикл по будням
+в 17:30 UTC и доступен для ручного запуска. Он устанавливает облегчённый набор
+`requirements-live.txt` и коммитит только новые immutable-записи из
+`data/live_predictions/` и `data/live_results/`.
 
 Расширенный отчёт содержит precision/recall/coverage, log loss, Brier score,
 calibration error, bootstrap 95% CI, результаты по fold, годам, режимам рынка
@@ -276,6 +295,8 @@ predictor_ml_data/
   backtest_ensemble_signal.py
   backtest_ranker.py
   generate_long_ideas.py
+  evaluate_live_predictions.py
+  live_validation.py
   backtest.py
   moex_client.py       # Клиент MOEX ISS API
   train_stock_model.py  # Обучение + экспорт .tflite

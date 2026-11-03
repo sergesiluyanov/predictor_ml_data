@@ -10,6 +10,7 @@ import pandas as pd
 
 from data_loader import load_index_history, load_ticker_histories
 from ensemble_signal_model import lightgbm_frame
+from live_validation import archive_live_prediction
 from ranking_model import select_long_candidates
 from tabular_features import FEATURE_COLUMNS, build_feature_frame
 from train_direction_model import parse_tickers
@@ -57,6 +58,9 @@ def main() -> None:
     )
     parser.add_argument(
         "--out", default="models/latest_long_ideas.json"
+    )
+    parser.add_argument(
+        "--live-dir", default="data/live_predictions"
     )
     args = parser.parse_args()
 
@@ -108,6 +112,7 @@ def main() -> None:
         "market_volatility_20": float(
             frame["market_volatility_20"].iloc[0]
         ),
+        "roundtrip_cost_bps": float(metadata["roundtrip_cost_bps"]),
         "candidates": [
             {
                 "ticker": row.ticker,
@@ -124,6 +129,14 @@ def main() -> None:
             "Не является инвестиционной рекомендацией."
         ),
     }
+    archive_path, archive_created = archive_live_prediction(
+        payload,
+        model_path,
+        metadata_path,
+        args.live_dir,
+    )
+    if not archive_created:
+        payload = json.loads(archive_path.read_text(encoding="utf-8"))
     output_path = Path(args.out)
     output_path.parent.mkdir(parents=True, exist_ok=True)
     output_path.write_text(
@@ -133,6 +146,10 @@ def main() -> None:
     print(
         f"Сохранено: {output_path}; "
         f"кандидатов: {len(payload['candidates'])}"
+    )
+    print(
+        f"Live-прогноз: {archive_path} "
+        f"({'создан' if archive_created else 'уже зафиксирован'})"
     )
 
 
