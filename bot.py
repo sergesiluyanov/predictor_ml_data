@@ -21,6 +21,7 @@ from predictor import (
     normalize_ticker,
     predict_stock,
 )
+from usage_limits import consume_request, refund_request
 
 
 load_dotenv()
@@ -30,6 +31,13 @@ logging.basicConfig(
 )
 logger = logging.getLogger(__name__)
 dispatcher = Dispatcher()
+FREE_REQUEST_LIMIT = int(os.getenv("FREE_REQUEST_LIMIT", "5"))
+USAGE_DB_PATH = os.getenv("USAGE_DB_PATH", "data/bot_usage.sqlite3")
+ADMIN_TELEGRAM_IDS = {
+    int(value.strip())
+    for value in os.getenv("ADMIN_TELEGRAM_IDS", "").split(",")
+    if value.strip().isdigit()
+}
 
 
 def _command_argument(message: Message) -> str | None:
@@ -39,6 +47,38 @@ def _command_argument(message: Message) -> str | None:
 
 def _format_price(value: float) -> str:
     return f"{value:,.2f}".replace(",", " ").replace(".", ",")
+
+
+async def _reserve_request(message: Message) -> tuple[int, int | None] | None:
+    if message.from_user is None:
+        return None
+    user_id = message.from_user.id
+    if user_id in ADMIN_TELEGRAM_IDS:
+        return user_id, None
+    allowed, remaining = await asyncio.to_thread(
+        consume_request,
+        USAGE_DB_PATH,
+        user_id,
+        FREE_REQUEST_LIMIT,
+    )
+    if not allowed:
+        await message.answer(
+            "Бесплатный лимит исчерпан. Доступно 5 демо-запросов. "
+            "Платный тариф появится только после завершения live-проверки."
+        )
+        return None
+    return user_id, remaining
+
+
+async def _refund_reserved(user_id: int, remaining: int | None) -> None:
+    if remaining is not None:
+        await asyncio.to_thread(refund_request, USAGE_DB_PATH, user_id)
+
+
+def _quota_text(remaining: int | None) -> str:
+    if remaining is None:
+        return ""
+    return f"\n\n🎟 Осталось бесплатных запросов: <b>{remaining}</b>"
 
 
 def _forecast_text(prediction: StockPrediction) -> str:
@@ -129,7 +169,8 @@ async def start_handler(message: Message) -> None:
         "<code>/predict SBER</code> — прогноз цены\n"
         "<code>/chart SBER</code> — прогноз с графиком\n"
         "<code>/ideas</code> — проверенные long-кандидаты на 5 сессий\n"
-        "<code>/help</code> — справка"
+        "<code>/help</code> — справка\n\n"
+        "Доступно 5 бесплатных демо-запросов."
     )
 
 
@@ -140,8 +181,13 @@ async def help_handler(message: Message) -> None:
 
 @dispatcher.message(Command("ideas"))
 async def ideas_handler(message: Message) -> None:
+    reservation = await _reserve_request(message)
+    if reservation is None:
+        return
+    user_id, remaining = reservation
     path = Path("models/latest_long_ideas.json")
     if not path.is_file():
+        await _refund_reserved(user_id, remaining)
         await message.answer(
             "Список long-кандидатов ещё не сформирован. "
             "Запустите <code>generate_long_ideas.py</code>."
@@ -150,6 +196,7 @@ async def ideas_handler(message: Message) -> None:
     try:
         payload = json.loads(path.read_text(encoding="utf-8"))
     except (OSError, json.JSONDecodeError):
+        await _refund_reserved(user_id, remaining)
         logger.exception("Cannot read long ideas")
         await message.answer("Не удалось прочитать список long-кандидатов.")
         return
@@ -169,6 +216,7 @@ async def ideas_handler(message: Message) -> None:
         "Сигнал прошёл исторический walk-forward gate, "
         "но ещё проходит live-проверку.\n"
         "⚠️ Не является инвестиционной рекомендацией."
+        f"{_quota_text(remaining)}"
     )
 
 
@@ -178,9 +226,17 @@ async def predict_handler(message: Message) -> None:
     if not ticker:
         await message.answer("Укажите тикер: <code>/predict SBER</code>")
         return
+    reservation = await _reserve_request(message)
+    if reservation is None:
+        return
+    user_id, remaining = reservation
     prediction = await _get_prediction(message, ticker)
     if prediction:
-        await message.answer(_forecast_text(prediction))
+        await message.answer(
+            _forecast_text(prediction) + _quota_text(remaining)
+        )
+    else:
+        await _refund_reserved(user_id, remaining)
 
 
 @dispatcher.message(Command("chart"))
@@ -189,13 +245,18 @@ async def chart_handler(message: Message) -> None:
     if not ticker:
         await message.answer("Укажите тикер: <code>/chart SBER</code>")
         return
+    reservation = await _reserve_request(message)
+    if reservation is None:
+        return
+    user_id, remaining = reservation
     prediction = await _get_prediction(message, ticker)
     if not prediction:
+        await _refund_reserved(user_id, remaining)
         return
     image = await asyncio.to_thread(build_prediction_chart, prediction)
     await message.answer_photo(
         BufferedInputFile(image, filename=f"{prediction.ticker}_forecast.png"),
-        caption=_forecast_text(prediction),
+        caption=_forecast_text(prediction) + _quota_text(remaining),
     )
 
 
@@ -204,9 +265,17 @@ async def ticker_handler(message: Message) -> None:
     ticker = (message.text or "").strip()
     if not ticker or ticker.startswith("/"):
         return
+    reservation = await _reserve_request(message)
+    if reservation is None:
+        return
+    user_id, remaining = reservation
     prediction = await _get_prediction(message, ticker)
     if prediction:
-        await message.answer(_forecast_text(prediction))
+        await message.answer(
+            _forecast_text(prediction) + _quota_text(remaining)
+        )
+    else:
+        await _refund_reserved(user_id, remaining)
 
 
 async def main() -> None:

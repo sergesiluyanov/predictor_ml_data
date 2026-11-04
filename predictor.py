@@ -11,7 +11,6 @@ import threading
 from catboost import CatBoostClassifier
 from lightgbm import Booster
 import numpy as np
-import tensorflow as tf
 
 from ensemble_signal_model import lightgbm_frame
 from feature_pipeline import build_latest_input
@@ -90,6 +89,13 @@ class _ModelRunner:
     """Переиспользует интерпретатор и защищает его от одновременных вызовов."""
 
     def __init__(self, model_path: Path):
+        try:
+            import tensorflow as tf
+        except ImportError as exc:
+            raise PredictionError(
+                "Для TFLite-модели требуется TensorFlow. "
+                "Используйте общую CatBoost-модель или установите TensorFlow."
+            ) from exc
         self.interpreter = tf.lite.Interpreter(model_path=str(model_path))
         self.interpreter.allocate_tensors()
         self.input_details = self.interpreter.get_input_details()[0]

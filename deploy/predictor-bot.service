@@ -1,0 +1,20 @@
+[Unit]
+Description=MOEX Predictor Telegram Bot
+After=network-online.target
+Wants=network-online.target
+
+[Service]
+Type=simple
+User=user1
+Group=user1
+WorkingDirectory=/opt/predictor-bot
+EnvironmentFile=/opt/predictor-bot/.env
+Environment=PYTHONUNBUFFERED=1
+ExecStart=/opt/predictor-bot/.venv/bin/python bot.py
+Restart=on-failure
+RestartSec=5
+PrivateTmp=true
+NoNewPrivileges=true
+
+[Install]
+WantedBy=multi-user.target

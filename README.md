@@ -84,6 +84,13 @@ pip install -r requirements.txt
 cp .env.example .env
 ```
 
+Для production-бота без TFLite/TensorFlow можно использовать облегчённые
+зависимости:
+
+```bash
+pip install -r requirements-bot.txt
+```
+
 3. Запишите токен в `.env`:
 
 ```dotenv
@@ -108,6 +115,17 @@ python bot.py
 - `/chart SBER` — прогноз и PNG-график;
 - `/ideas` — актуальные long-кандидаты на пять торговых сессий;
 - сообщение `SBER` — текстовый прогноз.
+
+Демо-режим предоставляет каждому Telegram ID пять запросов суммарно. Успешные
+`/predict`, `/chart`, `/ideas` и сообщения с тикером расходуют один запрос;
+ошибки возвращают запрос. Счётчики хранятся в SQLite и не сбрасываются после
+перезапуска:
+
+```dotenv
+FREE_REQUEST_LIMIT=5
+USAGE_DB_PATH=data/bot_usage.sqlite3
+# ADMIN_TELEGRAM_IDS=123456789
+```
 
 Бот сначала ищет общую `models/stock_direction.cbm`, показывает вероятности
 роста, боковика и падения и отсекает сигналы с уверенностью ниже 55%. Если
