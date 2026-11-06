@@ -1,0 +1,47 @@
+{
+  "generated_at": "2026-11-06T22:18:24",
+  "as_of": "2026-11-05",
+  "horizon_sessions": 5,
+  "universe_size": 251,
+  "market_return_20": 0.05142822928650559,
+  "market_volatility_20": 0.013721232567271976,
+  "roundtrip_cost_bps": 30.0,
+  "candidates": [
+    {
+      "ticker": "OZON",
+      "rank": 1,
+      "score": 0.21687624718800627
+    },
+    {
+      "ticker": "CBOM",
+      "rank": 2,
+      "score": 0.2046871548803269
+    },
+    {
+      "ticker": "AFLT",
+      "rank": 3,
+      "score": 0.18282428825303404
+    },
+    {
+      "ticker": "BAZA",
+      "rank": 4,
+      "score": 0.17197184870864965
+    },
+    {
+      "ticker": "MRKV",
+      "rank": 5,
+      "score": 0.16980408319241724
+    },
+    {
+      "ticker": "MGKL",
+      "rank": 6,
+      "score": 0.1690055958269144
+    }
+  ],
+  "load_errors": [],
+  "notice": "Исторический quality gate пройден; live-валидация продолжается. Не является инвестиционной рекомендацией.",
+  "model_sha256": "d395e9d25f6a11027a7d9b2e1799f3ca0231d59bbcf830fc310c06ec97c9fbbc",
+  "metadata_sha256": "1d8da5c7c0739b78666c04901a88d4380701ae8da940418cb201f3f3a9caf1c0",
+  "recorded_at": "2026-11-06T22:18:24",
+  "status": "pending"
+}
