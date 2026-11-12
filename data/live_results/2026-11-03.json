@@ -1,0 +1,87 @@
+{
+  "as_of": "2026-11-03",
+  "evaluated_at": "2026-11-12T22:53:07",
+  "horizon_sessions": 5,
+  "signals": 6,
+  "cash": false,
+  "candidates": [
+    {
+      "ticker": "BAZA",
+      "rank": 1,
+      "score": 0.23205187233124366,
+      "entry_date": "2026-11-05",
+      "entry_open": 143.94,
+      "exit_date": "2026-11-11",
+      "exit_close": 149.64,
+      "gross_return": 0.03959983326385985,
+      "net_return": 0.03659983326385985,
+      "profitable": true
+    },
+    {
+      "ticker": "OZON",
+      "rank": 2,
+      "score": 0.2198627800235643,
+      "entry_date": "2026-11-05",
+      "entry_open": 3750.0,
+      "exit_date": "2026-11-11",
+      "exit_close": 3828.5,
+      "gross_return": 0.02093333333333325,
+      "net_return": 0.01793333333333325,
+      "profitable": true
+    },
+    {
+      "ticker": "MGKL",
+      "rank": 3,
+      "score": 0.18215165916596093,
+      "entry_date": "2026-11-05",
+      "entry_open": 0.5885,
+      "exit_date": "2026-11-11",
+      "exit_close": 0.456,
+      "gross_return": -0.22514868309260838,
+      "net_return": -0.22814868309260838,
+      "profitable": false
+    },
+    {
+      "ticker": "MRKV",
+      "rank": 4,
+      "score": 0.16569527969262918,
+      "entry_date": "2026-11-05",
+      "entry_open": 0.22795,
+      "exit_date": "2026-11-11",
+      "exit_close": 0.2185,
+      "gross_return": -0.041456459749945274,
+      "net_return": -0.044456459749945276,
+      "profitable": false
+    },
+    {
+      "ticker": "MRKP",
+      "rank": 5,
+      "score": 0.16371084507381106,
+      "entry_date": "2026-11-05",
+      "entry_open": 0.5882,
+      "exit_date": "2026-11-11",
+      "exit_close": 0.588,
+      "gross_return": -0.0003400204012240504,
+      "net_return": -0.0033400204012240505,
+      "profitable": false
+    },
+    {
+      "ticker": "SFIN",
+      "rank": 6,
+      "score": 0.16368168628969293,
+      "entry_date": "2026-11-05",
+      "entry_open": 604.8,
+      "exit_date": "2026-11-11",
+      "exit_close": 621.0,
+      "gross_return": 0.026785714285714413,
+      "net_return": 0.023785714285714413,
+      "profitable": true
+    }
+  ],
+  "mean_net_return": -0.0329377137268117,
+  "median_net_return": 0.0072966564660546,
+  "profitable_share": 0.5,
+  "prediction_file": "data/live_predictions/2026-11-03.json",
+  "prediction_sha256": "bb868c17fd41cd3c36edcbd0ade872c2f6c6beebfa256f2418f00a5862d92caf",
+  "load_errors": []
+}
