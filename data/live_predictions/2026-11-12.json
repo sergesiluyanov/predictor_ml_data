@@ -1,0 +1,47 @@
+{
+  "generated_at": "2026-11-13T22:49:58",
+  "as_of": "2026-11-12",
+  "horizon_sessions": 5,
+  "universe_size": 251,
+  "market_return_20": 0.038227934108912454,
+  "market_volatility_20": 0.010820649650260002,
+  "roundtrip_cost_bps": 30.0,
+  "candidates": [
+    {
+      "ticker": "DZRDP",
+      "rank": 1,
+      "score": 0.21787070185693147
+    },
+    {
+      "ticker": "BAZA",
+      "rank": 2,
+      "score": 0.2069704203321881
+    },
+    {
+      "ticker": "DOMRF",
+      "rank": 3,
+      "score": 0.1634541579460672
+    },
+    {
+      "ticker": "STSBP",
+      "rank": 4,
+      "score": 0.149057949401365
+    },
+    {
+      "ticker": "CBOM",
+      "rank": 5,
+      "score": 0.14469680833585935
+    },
+    {
+      "ticker": "AFLT",
+      "rank": 6,
+      "score": 0.1228339417085665
+    }
+  ],
+  "load_errors": [],
+  "notice": "Исторический quality gate пройден; live-валидация продолжается. Не является инвестиционной рекомендацией.",
+  "model_sha256": "d395e9d25f6a11027a7d9b2e1799f3ca0231d59bbcf830fc310c06ec97c9fbbc",
+  "metadata_sha256": "1d8da5c7c0739b78666c04901a88d4380701ae8da940418cb201f3f3a9caf1c0",
+  "recorded_at": "2026-11-13T22:49:58",
+  "status": "pending"
+}
