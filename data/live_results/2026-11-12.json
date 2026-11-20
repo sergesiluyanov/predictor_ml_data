@@ -1,0 +1,87 @@
+{
+  "as_of": "2026-11-12",
+  "evaluated_at": "2026-11-20T23:21:08",
+  "horizon_sessions": 5,
+  "signals": 6,
+  "cash": false,
+  "candidates": [
+    {
+      "ticker": "DZRDP",
+      "rank": 1,
+      "score": 0.21787070185693147,
+      "entry_date": "2026-11-13",
+      "entry_open": 1460.0,
+      "exit_date": "2026-11-19",
+      "exit_close": 1290.0,
+      "gross_return": -0.11643835616438358,
+      "net_return": -0.11943835616438359,
+      "profitable": false
+    },
+    {
+      "ticker": "BAZA",
+      "rank": 2,
+      "score": 0.2069704203321881,
+      "entry_date": "2026-11-13",
+      "entry_open": 150.0,
+      "exit_date": "2026-11-19",
+      "exit_close": 138.6,
+      "gross_return": -0.07600000000000007,
+      "net_return": -0.07900000000000007,
+      "profitable": false
+    },
+    {
+      "ticker": "DOMRF",
+      "rank": 3,
+      "score": 0.1634541579460672,
+      "entry_date": "2026-11-13",
+      "entry_open": 2160.4,
+      "exit_date": "2026-11-19",
+      "exit_close": 2171.2,
+      "gross_return": 0.004999074245509938,
+      "net_return": 0.001999074245509938,
+      "profitable": true
+    },
+    {
+      "ticker": "STSBP",
+      "rank": 4,
+      "score": 0.149057949401365,
+      "entry_date": "2026-11-13",
+      "entry_open": 4.495,
+      "exit_date": "2026-11-19",
+      "exit_close": 4.485,
+      "gross_return": -0.0022246941045606095,
+      "net_return": -0.0052246941045606095,
+      "profitable": false
+    },
+    {
+      "ticker": "CBOM",
+      "rank": 5,
+      "score": 0.14469680833585935,
+      "entry_date": "2026-11-13",
+      "entry_open": 11.03,
+      "exit_date": "2026-11-19",
+      "exit_close": 10.149,
+      "gross_return": -0.07987307343608341,
+      "net_return": -0.08287307343608341,
+      "profitable": false
+    },
+    {
+      "ticker": "AFLT",
+      "rank": 6,
+      "score": 0.1228339417085665,
+      "entry_date": "2026-11-13",
+      "entry_open": 39.27,
+      "exit_date": "2026-11-19",
+      "exit_close": 37.1,
+      "gross_return": -0.05525846702317294,
+      "net_return": -0.058258467023172944,
+      "profitable": false
+    }
+  ],
+  "mean_net_return": -0.057132586080448446,
+  "median_net_return": -0.06862923351158651,
+  "profitable_share": 0.16666666666666666,
+  "prediction_file": "data/live_predictions/2026-11-12.json",
+  "prediction_sha256": "3bcbfc879ca17f1f2913f429fcf7b4255ef47e65c63302dddaf055c2a923d9f4",
+  "load_errors": []
+}

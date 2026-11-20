@@ -1,0 +1,16 @@
+{
+  "generated_at": "2026-11-20T23:20:41",
+  "as_of": "2026-11-19",
+  "horizon_sessions": 5,
+  "universe_size": 251,
+  "market_return_20": -0.011602112891826666,
+  "market_volatility_20": 0.01146717064308216,
+  "roundtrip_cost_bps": 30.0,
+  "candidates": [],
+  "load_errors": [],
+  "notice": "Исторический quality gate пройден; live-валидация продолжается. Не является инвестиционной рекомендацией.",
+  "model_sha256": "d395e9d25f6a11027a7d9b2e1799f3ca0231d59bbcf830fc310c06ec97c9fbbc",
+  "metadata_sha256": "1d8da5c7c0739b78666c04901a88d4380701ae8da940418cb201f3f3a9caf1c0",
+  "recorded_at": "2026-11-20T23:20:41",
+  "status": "pending"
+}
